@@ -1202,3 +1202,101 @@ body:has(.bottom-sheet.open) .lks-fab {
   cursor: pointer;
   padding: var(--space-2);
 }
+
+
+
+/* ---------- AR Scan Overlay ---------- */
+.ar-scan-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.6);
+  animation: fadeIn 0.3s ease;
+  pointer-events: none;
+}
+
+.ar-scan-overlay.hidden {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.4s, visibility 0.4s;
+}
+
+.ar-scan-box {
+  text-align: center;
+  padding: var(--space-6);
+}
+
+.ar-scan-corners {
+  width: 140px;
+  height: 140px;
+  margin: 0 auto var(--space-4);
+  position: relative;
+  animation: scanPulse 2s ease-in-out infinite;
+}
+
+.ar-scan-corners span {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  border-color: #00C853;
+  border-style: solid;
+}
+
+.ar-scan-corners span:nth-child(1) {
+  top: 0; left: 0;
+  border-width: 3px 0 0 3px;
+  border-radius: 4px 0 0 0;
+}
+.ar-scan-corners span:nth-child(2) {
+  top: 0; right: 0;
+  border-width: 3px 3px 0 0;
+  border-radius: 0 4px 0 0;
+}
+.ar-scan-corners span:nth-child(3) {
+  bottom: 0; left: 0;
+  border-width: 0 0 3px 3px;
+  border-radius: 0 0 0 4px;
+}
+.ar-scan-corners span:nth-child(4) {
+  bottom: 0; right: 0;
+  border-width: 0 3px 3px 0;
+  border-radius: 0 0 4px 0;
+}
+
+@keyframes scanPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(0, 200, 83, 0.2); transform: scale(1); }
+  50% { box-shadow: 0 0 0 12px rgba(0, 200, 83, 0); transform: scale(1.03); }
+}
+
+.ar-scan-text {
+  color: #ffffff;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  margin-bottom: var(--space-2);
+}
+
+.ar-scan-hint {
+  color: rgba(255,255,255,0.6);
+  font-size: var(--fs-xs);
+}
+
+/* AR viewport adjustments when scene is active */
+.ar-viewport {
+  position: relative;
+}
+
+.ar-viewport a-scene {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.ar-viewport .a-canvas {
+  width: 100% !important;
+  height: 100% !important;
+}

@@ -5,7 +5,7 @@
  */
 
 import { sensorManager } from '../modules/sensors.js';
-import { SimCanvas, loadAR, canRunAR } from '../modules/ar-loader.js';
+import { SimCanvas, loadAR, canRunAR, startARScene } from '../modules/ar-loader.js';
 import { SimpleGraph } from '../modules/graph.js';
 import { showTutorial } from '../modules/tutorial.js';
 import { initLKS } from '../modules/lks.js';
@@ -238,6 +238,7 @@ sheet.classList.add('open');
 
 
 // ─── Mode Switcher (Sim / AR) ───
+let arInstance = null;
 const modeBtns = document.querySelectorAll('#mode-switcher .mode-btn');
 modeBtns.forEach((btn) => {
   btn.addEventListener('click', async () => {
@@ -254,19 +255,23 @@ modeBtns.forEach((btn) => {
         modeBtns[0].click();
         return;
       }
+      sim.stop();
       simView.classList.add('hidden');
       arView.classList.remove('hidden');
       arView.innerHTML = '<p style="padding:var(--space-6);text-align:center;color:var(--text-secondary)">Memuat AR... Tunggu sebentar.</p>';
 
       const loaded = await loadAR();
       if (loaded) {
-        arView.innerHTML = createARScene();
-        window.showToast('Mode AR aktif! Arahkan kamera ke marker Hiro.', 'info');
+        arInstance = startARScene(arView, createARContent(), {
+          onMarkerFound: () => window.showToast('Marker terdeteksi! 🎉', 'success', 2000),
+          onMarkerLost: () => {}
+        });
       } else {
         window.showToast('Gagal memuat AR. Cek koneksi internet.', 'error');
         modeBtns[0].click();
       }
     } else {
+      if (arInstance) { arInstance.destroy(); arInstance = null; }
       arView.classList.add('hidden');
       arView.innerHTML = '';
       simView.classList.remove('hidden');
@@ -275,22 +280,26 @@ modeBtns.forEach((btn) => {
   });
 });
 
-function createARScene() {
+function createARContent() {
   return `
-    <a-scene embedded arjs="sourceType:webcam;debugUIEnabled:false;" renderer="antialias:true;alpha:true" vr-mode-ui="enabled:false" style="position:absolute;top:0;left:0;width:100%;height:100%;overflow:hidden;">
-      <a-marker preset="hiro">
-        <a-entity rotation="-60 0 0" scale="0.4 0.4 0.4">
-          <a-cylinder position="0 0 0" radius="0.4" height="0.08" color="#e2e8f0"></a-cylinder>
-          <a-cylinder position="0 1.2 0" radius="0.04" height="2.4" color="#94a3b8"></a-cylinder>
-          <a-box position="0 2.4 0.5" width="0.08" height="0.08" depth="1.2" color="#94a3b8"></a-box>
-          <a-entity id="ar-anchor" position="0 2.4 0.8">
-            <a-cylinder position="0 -0.5 0" radius="0.01" height="1" color="#475569"></a-cylinder>
-            <a-sphere position="0 -1 0" radius="0.15" color="#0066FF" material="metalness:0.5;roughness:0.3"></a-sphere>
-          </a-entity>
-        </a-entity>
-      </a-marker>
-      <a-entity camera></a-entity>
-    </a-scene>
+    <a-entity rotation="-60 0 0" scale="0.5 0.5 0.5">
+      <!-- Stand base -->
+      <a-cylinder position="0 0 0" radius="0.5" height="0.1" color="#334155" material="metalness:0.7;roughness:0.3"></a-cylinder>
+      <!-- Vertical pole -->
+      <a-cylinder position="0 1.5 0" radius="0.04" height="3" color="#64748b"></a-cylinder>
+      <!-- Horizontal arm -->
+      <a-box position="0 3 0.6" width="0.08" height="0.08" depth="1.4" color="#64748b"></a-box>
+      <!-- Pendulum -->
+      <a-entity id="ar-pendulum" position="0 3 1.1">
+        <a-cylinder position="0 -0.75 0" radius="0.01" height="1.5" color="#f0f4ff"></a-cylinder>
+        <a-sphere position="0 -1.5 0" radius="0.18" color="#3b82f6"
+          material="metalness:0.6;roughness:0.2"
+          animation="property:position;to:0.4 -1.4 0;dir:alternate;dur:1500;loop:true;easing:easeInOutSine">
+        </a-sphere>
+      </a-entity>
+      <!-- Label -->
+      <a-text value="T = 2pi*sqrt(L/g)" position="0 -0.3 0" align="center" color="#0066FF" width="3" font="monoid"></a-text>
+    </a-entity>
   `;
 }
 

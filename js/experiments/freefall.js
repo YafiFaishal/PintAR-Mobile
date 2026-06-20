@@ -4,7 +4,7 @@
  */
 
 import { sensorManager } from '../modules/sensors.js';
-import { SimCanvas, loadAR, canRunAR } from '../modules/ar-loader.js';
+import { SimCanvas, loadAR, canRunAR, startARScene } from '../modules/ar-loader.js';
 import { SimpleGraph } from '../modules/graph.js';
 import { showTutorial } from '../modules/tutorial.js';
 import { initLKS } from '../modules/lks.js';
@@ -231,7 +231,19 @@ modeBtns.forEach((btn) => {
       arView.innerHTML = '<p style="padding:var(--space-6);text-align:center;color:var(--text-secondary)">Memuat AR...</p>';
       const loaded = await loadAR();
       if (loaded) {
-        arView.innerHTML = `<a-scene embedded arjs="sourceType:webcam;debugUIEnabled:false;" vr-mode-ui="enabled:false" style="position:absolute;top:0;left:0;width:100%;height:100%;overflow:hidden;"><a-marker preset="hiro"><a-entity rotation="-60 0 0" scale="0.3 0.3 0.3"><a-plane position="0 0 0" rotation="-90 0 0" width="3" height="3" color="#e2e8f0"></a-plane><a-cylinder position="-0.8 2 0" radius="0.04" height="4" color="#94a3b8"></a-cylinder><a-sphere id="ar-ball" position="0 4 0" radius="0.15" color="${obj.color}"></a-sphere></a-entity></a-marker><a-entity camera></a-entity></a-scene>`;
+        startARScene(arView, `
+          <a-entity rotation="-60 0 0" scale="0.4 0.4 0.4">
+            <a-plane position="0 0 0" rotation="-90 0 0" width="3" height="3" color="#e2e8f0" material="opacity:0.8"></a-plane>
+            <a-cylinder position="-0.6 2 0" radius="0.04" height="4" color="#64748b"></a-cylinder>
+            <a-box position="-0.6 4.05 0" width="0.4" height="0.1" depth="0.4" color="#ef4444"></a-box>
+            <a-sphere position="0 4 0" radius="0.18" color="${obj.color}" material="metalness:0.7;roughness:0.2"
+              animation="property:position;to:0 0.2 0;dur:1500;easing:easeInQuad;loop:true;delay:500">
+            </a-sphere>
+            <a-text value="h = 1/2 g t^2" position="0 -0.3 0" align="center" color="#D32F2F" width="3" font="monoid"></a-text>
+          </a-entity>
+        `, {
+          onMarkerFound: () => window.showToast('Marker terdeteksi! 🎉', 'success', 2000)
+        });
         window.showToast('AR aktif! Arahkan ke marker Hiro.', 'info');
       } else { window.showToast('Gagal memuat AR.', 'error'); modeBtns[0].click(); }
     } else {

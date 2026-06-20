@@ -32,9 +32,11 @@
     <!-- Hero -->
     <section class="hero">
       <div class="container">
+        <p style="font-size:var(--fs-xs);font-weight:600;color:var(--brand-primary);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:var(--space-2)">WebAR — Buka di Browser HP</p>
         <h1>Lab Sains <span class="brand-highlight">Virtual</span><br>di Genggamanmu</h1>
-        <p>Praktikum fisika & kimia pakai HP. Tanpa install, tanpa lab fisik. Langsung buka & eksperimen!</p>
-        <a href="#experiments" class="btn btn-primary btn-lg btn-block">🧪 Mulai Eksperimen</a>
+        <p>Praktikum fisika & kimia interaktif pakai HP. Tersedia mode <strong>AR 3D</strong> (scan marker) dan <strong>Simulasi</strong> (tanpa kamera). Gratis & tanpa install!</p>
+        <a href="#experiments" class="btn btn-primary btn-lg btn-block" style="margin-bottom:var(--space-3)">🧪 Mulai Eksperimen</a>
+        <a href="marker.html" class="btn btn-secondary btn-lg btn-block">🖨️ Cetak / Lihat Marker AR</a>
       </div>
     </section>
 
@@ -142,6 +144,20 @@
               </div>
             </div>
           </div>
+
+          <!-- Redox -->
+          <div class="card exp-card" onclick="goTo('experiments/redox.html')">
+            <div class="card-icon chemistry">⚡</div>
+            <div class="card-body">
+              <h3>Reaksi Redoks</h3>
+              <p>Oksidasi & reduksi. Hitung E° sel, tentukan oksidator/reduktor.</p>
+              <div class="card-tags">
+                <span class="tag">Kimia</span>
+                <span class="tag">Kelas 10-12</span>
+                <span class="tag">Shake</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -187,7 +203,7 @@
     </section>
 
     <!-- How to Use -->
-    <section style="padding: var(--space-6) 0 var(--space-10);">
+    <section style="padding: var(--space-6) 0;">
       <div class="container">
         <h2 class="section-title">📖 Cara Pakai</h2>
         <div class="card" style="padding:var(--space-4)">
@@ -198,6 +214,33 @@
             <li><strong>Jalankan</strong> dan amati hasilnya di layar</li>
             <li><strong>Isi LKS Digital</strong> (klik 📋) untuk catat hasil & kirim ke guru</li>
           </ol>
+        </div>
+      </div>
+    </section>
+
+    <!-- AR Info -->
+    <section style="padding: var(--space-6) 0 var(--space-10);">
+      <div class="container">
+        <h2 class="section-title">📷 Mode AR (Augmented Reality)</h2>
+        <div class="card" style="padding:var(--space-4)">
+          <p style="font-size:var(--fs-sm);color:var(--text-secondary);margin-bottom:var(--space-3);line-height:1.6">
+            Mode AR menampilkan <strong>objek 3D virtual</strong> di atas marker yang kamu cetak. Arahkan kamera HP ke marker dan lihat eksperimen hidup di dunia nyata!
+          </p>
+          <div style="display:flex;gap:var(--space-3);margin-bottom:var(--space-4);flex-wrap:wrap">
+            <div style="flex:1;min-width:120px;padding:var(--space-3);background:var(--bg-primary);border-radius:var(--radius-md);border:1px solid var(--border-light);text-align:center">
+              <p style="font-size:1.5rem;margin-bottom:var(--space-1)">1️⃣</p>
+              <p style="font-size:var(--fs-xs);color:var(--text-secondary)">Cetak/tampilkan marker Hiro</p>
+            </div>
+            <div style="flex:1;min-width:120px;padding:var(--space-3);background:var(--bg-primary);border-radius:var(--radius-md);border:1px solid var(--border-light);text-align:center">
+              <p style="font-size:1.5rem;margin-bottom:var(--space-1)">2️⃣</p>
+              <p style="font-size:var(--fs-xs);color:var(--text-secondary)">Pilih "Mode AR" di eksperimen</p>
+            </div>
+            <div style="flex:1;min-width:120px;padding:var(--space-3);background:var(--bg-primary);border-radius:var(--radius-md);border:1px solid var(--border-light);text-align:center">
+              <p style="font-size:1.5rem;margin-bottom:var(--space-1)">3️⃣</p>
+              <p style="font-size:var(--fs-xs);color:var(--text-secondary)">Arahkan kamera → objek 3D muncul!</p>
+            </div>
+          </div>
+          <a href="marker.html" class="btn btn-secondary btn-block btn-sm">🖨️ Cetak / Lihat Marker Hiro →</a>
         </div>
       </div>
     </section>

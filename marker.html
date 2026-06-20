@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <meta name="theme-color" content="#0066FF">
+  <title>Marker AR | PintAR</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="manifest" href="manifest.json">
+  <style>
+    .marker-page { padding: var(--space-6) 0 var(--space-12); }
+    .marker-box {
+      background: #ffffff;
+      border: 3px solid var(--border-medium);
+      border-radius: var(--radius-lg);
+      padding: var(--space-5);
+      text-align: center;
+      margin-bottom: var(--space-4);
+    }
+    .marker-box img {
+      width: 100%;
+      max-width: 260px;
+      margin: 0 auto var(--space-3);
+      display: block;
+      border-radius: var(--radius-sm);
+    }
+    .marker-label {
+      font-size: var(--fs-xs);
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #334155;
+      font-family: var(--font-mono);
+    }
+    .tips-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+    }
+    .tip-item {
+      display: flex;
+      gap: var(--space-3);
+      align-items: flex-start;
+      font-size: var(--fs-sm);
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+    .tip-item .tip-icon {
+      font-size: 1.2rem;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .spec-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-2);
+      margin-top: var(--space-4);
+    }
+    .spec-item {
+      padding: var(--space-3);
+      background: var(--bg-primary);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+    }
+    .spec-item .spec-label {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .spec-item .spec-value {
+      font-size: var(--fs-sm);
+      font-weight: 700;
+      color: var(--brand-primary);
+      font-family: var(--font-mono);
+    }
+    @media print {
+      body { background: #fff !important; color: #000 !important; }
+      .no-print { display: none !important; }
+      .marker-box { border: 4px solid #000; box-shadow: none; }
+      .marker-box img { max-width: 300px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="navbar no-print">
+    <div class="container">
+      <a href="index.html" class="navbar-brand">
+        <span class="brand-icon">🔬</span>
+        <span>Pint<strong style="color:var(--brand-primary)">AR</strong></span>
+      </a>
+      <div class="navbar-actions">
+        <button class="btn btn-icon btn-secondary" id="btn-theme" aria-label="Ganti tema">🌙</button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="marker-page">
+    <div class="container">
+
+      <!-- Header -->
+      <div class="no-print" style="text-align:center;margin-bottom:var(--space-6)">
+        <h1 style="font-size:var(--fs-2xl);margin-bottom:var(--space-2)">🖨️ Marker AR</h1>
+        <p style="font-size:var(--fs-sm);color:var(--text-secondary);max-width:320px;margin:0 auto">
+          Cetak atau tampilkan marker ini di layar lain, lalu scan pakai kamera di mode AR.
+        </p>
+      </div>
+
+      <!-- Marker Image -->
+      <div class="marker-box">
+        <img
+          src="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/images/hiro.png"
+          alt="Marker Hiro AR"
+          id="marker-img"
+          crossorigin="anonymous"
+        >
+        <span class="marker-label">HIRO MARKER</span>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="no-print" style="display:flex;flex-direction:column;gap:var(--space-3);margin-bottom:var(--space-6)">
+        <button class="btn btn-primary btn-lg btn-block" onclick="window.print()" id="btn-print">
+          🖨️ Cetak Marker
+        </button>
+        <a href="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/images/hiro.png"
+           download="hiro-marker-pintar.png"
+           class="btn btn-secondary btn-block"
+           target="_blank" rel="noopener">
+          ⬇️ Download Gambar (PNG)
+        </a>
+      </div>
+
+      <!-- Tips -->
+      <div class="card no-print" style="padding:var(--space-4);margin-bottom:var(--space-4)">
+        <h3 style="font-size:var(--fs-base);font-weight:700;margin-bottom:var(--space-3)">💡 Tips Supaya AR Lancar</h3>
+        <div class="tips-list">
+          <div class="tip-item">
+            <span class="tip-icon">📐</span>
+            <span>Cetak marker minimal ukuran <strong>10 × 10 cm</strong> (semakin besar semakin bagus)</span>
+          </div>
+          <div class="tip-item">
+            <span class="tip-icon">🖤</span>
+            <span>Gunakan tinta <strong>hitam pekat</strong>. Jangan abu-abu atau buram.</span>
+          </div>
+          <div class="tip-item">
+            <span class="tip-icon">💡</span>
+            <span>Pastikan <strong>pencahayaan cukup</strong>. Hindari bayangan di atas marker.</span>
+          </div>
+          <div class="tip-item">
+            <span class="tip-icon">📏</span>
+            <span>Jarak scan optimal: <strong>20–50 cm</strong> dari kamera ke marker.</span>
+          </div>
+          <div class="tip-item">
+            <span class="tip-icon">📱</span>
+            <span>Bisa juga <strong>tampilkan marker di layar laptop/tablet</strong> lalu scan pakai HP.</span>
+          </div>
+          <div class="tip-item">
+            <span class="tip-icon">🔒</span>
+            <span>Website harus diakses via <strong>HTTPS</strong> agar kamera bisa aktif (GitHub Pages sudah HTTPS).</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Specs -->
+      <div class="card no-print" style="padding:var(--space-4);margin-bottom:var(--space-6)">
+        <h3 style="font-size:var(--fs-base);font-weight:700;margin-bottom:var(--space-2)">📋 Spesifikasi Teknis</h3>
+        <div class="spec-grid">
+          <div class="spec-item">
+            <div class="spec-label">Library AR</div>
+            <div class="spec-value">AR.js 3.4.8</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-label">3D Engine</div>
+            <div class="spec-value">A-Frame 1.6</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-label">Jenis Marker</div>
+            <div class="spec-value">Hiro (preset)</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-label">Ukuran Min.</div>
+            <div class="spec-value">10 × 10 cm</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-label">Jarak Scan</div>
+            <div class="spec-value">20–50 cm</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-label">Browser</div>
+            <div class="spec-value">Chrome / Safari</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- How it works -->
+      <div class="card no-print" style="padding:var(--space-4);margin-bottom:var(--space-6)">
+        <h3 style="font-size:var(--fs-base);font-weight:700;margin-bottom:var(--space-3)">🔍 Cara Kerja Mode AR</h3>
+        <ol style="list-style:decimal;padding-left:var(--space-5);display:flex;flex-direction:column;gap:var(--space-3);font-size:var(--fs-sm);color:var(--text-secondary)">
+          <li>Cetak/tampilkan marker Hiro ini di kertas atau layar lain</li>
+          <li>Buka eksperimen di PintAR, pilih <strong>"Mode AR"</strong></li>
+          <li>Izinkan akses kamera saat diminta</li>
+          <li>Arahkan kamera HP ke marker → <strong>objek 3D muncul!</strong></li>
+          <li>Gerakkan HP untuk melihat dari berbagai sudut</li>
+        </ol>
+      </div>
+
+      <!-- Back button -->
+      <div class="no-print" style="text-align:center">
+        <a href="index.html" class="btn btn-secondary btn-block">← Kembali ke Eksperimen</a>
+      </div>
+
+    </div>
+  </main>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

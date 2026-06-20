@@ -16,7 +16,7 @@
  */
 
 import { sensorManager } from '../modules/sensors.js';
-import { SimCanvas, loadAR, canRunAR } from '../modules/ar-loader.js';
+import { SimCanvas, loadAR, canRunAR, startARScene } from '../modules/ar-loader.js';
 import { showTutorial } from '../modules/tutorial.js';
 import { initLKS } from '../modules/lks.js';
 
