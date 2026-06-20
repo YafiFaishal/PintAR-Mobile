@@ -7,6 +7,7 @@ import { sensorManager } from '../modules/sensors.js';
 import { SimCanvas, loadAR, canRunAR, startARScene } from '../modules/ar-loader.js';
 import { showTutorial } from '../modules/tutorial.js';
 import { initLKS } from '../modules/lks.js';
+import { showQuiz } from '../modules/quiz.js';
 
 // ─── Reaction Data ───
 const reactions = {
@@ -289,3 +290,49 @@ initLKS({
 
 // Init
 updateDisplay();
+
+
+
+// ─── Quiz Button ───
+const quizFab = document.createElement('button');
+quizFab.className = 'quiz-fab';
+quizFab.innerHTML = '📝 Quiz';
+quizFab.addEventListener('click', () => {
+  showQuiz({
+    experimentId: 'chemistry',
+    title: 'Quiz: Reaksi Kimia',
+    questions: [
+      {
+        question: 'Reaksi NaOH + HCl → NaCl + H₂O termasuk reaksi...',
+        options: ['Oksidasi', 'Reduksi', 'Netralisasi', 'Dekomposisi'],
+        correct: 2,
+        explanation: 'Reaksi antara asam (HCl) dan basa (NaOH) menghasilkan garam + air. Ini adalah reaksi netralisasi.'
+      },
+      {
+        question: 'Ciri reaksi eksotermik adalah...',
+        options: ['Suhu turun', 'Suhu naik', 'pH naik', 'Warna tidak berubah'],
+        correct: 1,
+        explanation: 'Reaksi eksotermik melepaskan kalor ke lingkungan sehingga suhu naik. Contoh: netralisasi asam-basa.'
+      },
+      {
+        question: 'pH larutan netral adalah...',
+        options: ['0', '5', '7', '14'],
+        correct: 2,
+        explanation: 'pH 7 = netral. pH < 7 = asam. pH > 7 = basa.'
+      },
+      {
+        question: 'Gas yang dihasilkan dari reaksi cuka + baking soda adalah...',
+        options: ['O₂', 'H₂', 'CO₂', 'N₂'],
+        correct: 2,
+        explanation: 'CH₃COOH + NaHCO₃ → CH₃COONa + H₂O + CO₂↑. Gas CO₂ keluar sebagai gelembung.'
+      },
+      {
+        question: 'Indikator universal berubah warna hijau pada pH...',
+        options: ['1-2 (sangat asam)', '5-6 (asam lemah)', '7 (netral)', '12-14 (basa kuat)'],
+        correct: 2,
+        explanation: 'Warna hijau pada indikator universal menunjukkan pH sekitar 7 (netral).'
+      }
+    ]
+  });
+});
+document.body.appendChild(quizFab);

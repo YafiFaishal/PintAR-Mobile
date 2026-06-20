@@ -9,6 +9,7 @@ import { SimCanvas, loadAR, canRunAR, startARScene } from '../modules/ar-loader.
 import { SimpleGraph } from '../modules/graph.js';
 import { showTutorial } from '../modules/tutorial.js';
 import { initLKS } from '../modules/lks.js';
+import { showQuiz } from '../modules/quiz.js';
 
 // ─── State ───
 let L = 1.0;       // length (m)
@@ -345,3 +346,49 @@ initLKS({
 
 // ─── Init ───
 updateTheory();
+
+
+
+// ─── Quiz Button ───
+const quizFab = document.createElement('button');
+quizFab.className = 'quiz-fab';
+quizFab.innerHTML = '📝 Quiz';
+quizFab.addEventListener('click', () => {
+  showQuiz({
+    experimentId: 'pendulum',
+    title: 'Quiz: Bandul',
+    questions: [
+      {
+        question: 'Rumus periode bandul sederhana adalah...',
+        options: ['T = 2π√(L/g)', 'T = 2π√(g/L)', 'T = 2π(L×g)', 'T = π√(L/g)'],
+        correct: 0,
+        explanation: 'Periode bandul T = 2π√(L/g), di mana L adalah panjang tali dan g adalah percepatan gravitasi.'
+      },
+      {
+        question: 'Jika panjang tali diperbesar 4x, periode bandul menjadi...',
+        options: ['4 kali lebih besar', '2 kali lebih besar', '16 kali lebih besar', 'Tidak berubah'],
+        correct: 1,
+        explanation: 'T ∝ √L. Jika L menjadi 4L, maka T baru = 2π√(4L/g) = 2 × T awal. Jadi periode menjadi 2x lipat.'
+      },
+      {
+        question: 'Apa yang terjadi pada periode bandul jika massa beban ditambah?',
+        options: ['Periode bertambah', 'Periode berkurang', 'Tidak berubah', 'Tergantung bentuk beban'],
+        correct: 2,
+        explanation: 'Massa TIDAK mempengaruhi periode bandul! Rumus T = 2π√(L/g) tidak mengandung massa (m).'
+      },
+      {
+        question: 'Di planet dengan gravitasi 2x Bumi, periode bandul akan...',
+        options: ['2x lebih lama', '√2 x lebih lama', '1/√2 x lebih cepat', '2x lebih cepat'],
+        correct: 2,
+        explanation: 'T ∝ 1/√g. Jika g naik 2x, maka T baru = T/√2 ≈ 0.707T. Periode lebih cepat (pendek).'
+      },
+      {
+        question: 'Gerak bandul termasuk jenis gerak...',
+        options: ['Gerak Lurus Beraturan', 'Gerak Harmonik Sederhana', 'Gerak Parabola', 'Gerak Melingkar'],
+        correct: 1,
+        explanation: 'Bandul yang berayun dengan sudut kecil merupakan contoh Gerak Harmonik Sederhana (GHS).'
+      }
+    ]
+  });
+});
+document.body.appendChild(quizFab);

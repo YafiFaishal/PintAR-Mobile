@@ -8,6 +8,7 @@ import { SimCanvas, loadAR, canRunAR, startARScene } from '../modules/ar-loader.
 import { SimpleGraph } from '../modules/graph.js';
 import { showTutorial } from '../modules/tutorial.js';
 import { initLKS } from '../modules/lks.js';
+import { showQuiz } from '../modules/quiz.js';
 
 // ─── State ───
 let h0 = 10;
@@ -288,3 +289,49 @@ initLKS({
 
 // Init
 resetExperiment();
+
+
+
+// ─── Quiz Button ───
+const quizFab = document.createElement('button');
+quizFab.className = 'quiz-fab';
+quizFab.innerHTML = '📝 Quiz';
+quizFab.addEventListener('click', () => {
+  showQuiz({
+    experimentId: 'freefall',
+    title: 'Quiz: Jatuh Bebas',
+    questions: [
+      {
+        question: 'Rumus ketinggian benda jatuh bebas setelah waktu t adalah...',
+        options: ['h = gt²', 'h = ½gt²', 'h = 2gt²', 'h = g/t²'],
+        correct: 1,
+        explanation: 'Rumus jatuh bebas: h = ½gt². Benda jatuh dari ketinggian h₀, posisi setelah t detik: y = h₀ - ½gt².'
+      },
+      {
+        question: 'Di ruang hampa (vakum), benda mana yang jatuh lebih cepat?',
+        options: ['Bola besi (berat)', 'Bulu ayam (ringan)', 'Sama cepatnya', 'Tergantung bentuknya'],
+        correct: 2,
+        explanation: 'Di ruang hampa tidak ada hambatan udara. Semua benda jatuh dengan percepatan sama (g), tidak peduli massanya!'
+      },
+      {
+        question: 'Kecepatan benda jatuh bebas setelah 3 detik di Bumi (g=10 m/s²) adalah...',
+        options: ['10 m/s', '20 m/s', '30 m/s', '45 m/s'],
+        correct: 2,
+        explanation: 'v = g × t = 10 × 3 = 30 m/s. Kecepatan bertambah 10 m/s setiap detiknya.'
+      },
+      {
+        question: 'Apa efek hambatan udara pada benda yang jatuh?',
+        options: ['Mempercepat jatuh', 'Membuat jatuh lebih lambat', 'Tidak ada efek', 'Membuat benda terbang'],
+        correct: 1,
+        explanation: 'Hambatan udara (drag) melawan arah gerak benda, sehingga benda jatuh lebih lambat. Benda ringan/lebar lebih terpengaruh.'
+      },
+      {
+        question: 'Berapa jarak yang ditempuh benda jatuh bebas selama 2 detik? (g=10 m/s²)',
+        options: ['10 m', '20 m', '30 m', '40 m'],
+        correct: 1,
+        explanation: 'h = ½gt² = ½ × 10 × 2² = ½ × 10 × 4 = 20 meter.'
+      }
+    ]
+  });
+});
+document.body.appendChild(quizFab);
