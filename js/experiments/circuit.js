@@ -348,12 +348,6 @@ ctrlR1.addEventListener('input', (e) => { R1 = parseFloat(e.target.value); dispR
 ctrlR2.addEventListener('input', (e) => { R2 = parseFloat(e.target.value); dispR2.textContent = R2 + ' Ω'; calculate(); });
 ctrlR3.addEventListener('input', (e) => { R3 = parseFloat(e.target.value); dispR3.textContent = R3 + ' Ω'; calculate(); });
 
-// Bottom sheet
-const sheet = document.getElementById('controls-sheet');
-const btnToggle = document.getElementById('btn-toggle-sheet');
-btnToggle.addEventListener('click', () => {
-  sheet.classList.toggle('open');
-  btnToggle.textContent = sheet.classList.contains('open') ? '▼' : '▲';
 });
 
 // Mode switcher

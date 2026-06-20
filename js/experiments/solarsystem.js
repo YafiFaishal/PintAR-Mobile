@@ -199,12 +199,6 @@ ctrlSpeed.addEventListener('input', (e) => {
   dispSpeed.textContent = timeScale.toFixed(1) + 'x';
 });
 
-// Bottom sheet
-const sheet = document.getElementById('controls-sheet');
-const btnToggle = document.getElementById('btn-toggle-sheet');
-btnToggle.addEventListener('click', () => {
-  sheet.classList.toggle('open');
-  btnToggle.textContent = sheet.classList.contains('open') ? '▼' : '▲';
 });
 
 // Mode switcher

@@ -226,15 +226,7 @@ btnStart.addEventListener('click', () => {
 
 btnReset.addEventListener('click', resetPendulum);
 
-// ─── Bottom Sheet Toggle ───
-const sheet = document.getElementById('controls-sheet');
-const btnToggle = document.getElementById('btn-toggle-sheet');
-btnToggle.addEventListener('click', () => {
-  sheet.classList.toggle('open');
-  btnToggle.textContent = sheet.classList.contains('open') ? '▼' : '▲';
-});
-// Start open
-sheet.classList.add('open');
+// Sheet is handled globally by app.js initBottomSheet()
 
 
 // ─── Mode Switcher (Sim / AR) ───

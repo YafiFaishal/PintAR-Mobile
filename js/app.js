@@ -154,9 +154,106 @@ window.goTo = function (path) {
   window.location.href = path;
 };
 
+// ─── Bottom Sheet Swipe/Tap Handler (Global) ───
+function initBottomSheet() {
+  const sheet = document.getElementById('controls-sheet');
+  if (!sheet) return;
+
+  const handle = sheet.querySelector('.bottom-sheet-handle');
+  const header = sheet.querySelector('.bottom-sheet-header');
+  const btnToggle = sheet.querySelector('#btn-toggle-sheet');
+
+  let startY = 0;
+  let currentY = 0;
+  let isDragging = false;
+
+  function toggleSheet() {
+    sheet.classList.toggle('open');
+    if (btnToggle) {
+      btnToggle.textContent = sheet.classList.contains('open') ? '▼' : '▲';
+    }
+  }
+
+  function closeSheet() {
+    sheet.classList.remove('open');
+    if (btnToggle) btnToggle.textContent = '▲';
+  }
+
+  function openSheet() {
+    sheet.classList.add('open');
+    if (btnToggle) btnToggle.textContent = '▼';
+  }
+
+  // Tap handle or header to toggle
+  if (handle) {
+    handle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleSheet();
+    });
+  }
+
+  if (header) {
+    header.addEventListener('click', (e) => {
+      if (e.target === btnToggle || e.target.closest('#btn-toggle-sheet')) return;
+      toggleSheet();
+    });
+  }
+
+  if (btnToggle) {
+    btnToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleSheet();
+    });
+  }
+
+  // Swipe down on handle/header to close
+  const dragArea = handle || header;
+  if (dragArea) {
+    dragArea.addEventListener('touchstart', (e) => {
+      if (!sheet.classList.contains('open')) return;
+      startY = e.touches[0].clientY;
+      isDragging = true;
+      sheet.style.transition = 'none';
+    }, { passive: true });
+
+    dragArea.addEventListener('touchmove', (e) => {
+      if (!isDragging) return;
+      currentY = e.touches[0].clientY;
+      const diff = currentY - startY;
+      if (diff > 0) {
+        // Only allow dragging down
+        sheet.style.transform = `translateY(${diff}px)`;
+      }
+    }, { passive: true });
+
+    dragArea.addEventListener('touchend', () => {
+      if (!isDragging) return;
+      isDragging = false;
+      sheet.style.transition = '';
+      const diff = currentY - startY;
+
+      if (diff > 80) {
+        // Swiped down enough → close
+        closeSheet();
+      } else {
+        // Snap back open
+        sheet.style.transform = '';
+        openSheet();
+      }
+      sheet.style.transform = '';
+      startY = 0;
+      currentY = 0;
+    });
+  }
+
+  // Start open by default
+  openSheet();
+}
+
 // ─── Init ───
 document.addEventListener('DOMContentLoaded', () => {
   initTheme();
   initPWA();
   checkSensors();
+  initBottomSheet();
 });
