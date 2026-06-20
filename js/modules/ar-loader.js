@@ -193,7 +193,7 @@ export class SimCanvas {
     this.h = rect.height;
   }
   setDrawFunction(fn) { this.drawFn = fn; }
-  start() { this.running = true; this._loop(); }
+  start() { this.running = true; this._resize(); this._loop(); }
   stop() { this.running = false; }
   clear() { this.ctx.clearRect(0, 0, this.w, this.h); }
   destroy() { this.running = false; window.removeEventListener('resize', this._resizeBound); }
