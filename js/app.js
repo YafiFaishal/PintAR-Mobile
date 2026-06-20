@@ -76,7 +76,8 @@ let deferredPrompt = null;
 function initPWA() {
   // Register service worker
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js').catch(() => {});
+    const swPath = location.pathname.includes('/experiments/') ? '../sw.js' : 'sw.js';
+    navigator.serviceWorker.register(swPath).catch(() => {});
   }
 
   // Listen for install prompt

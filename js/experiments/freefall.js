@@ -4,7 +4,7 @@
  */
 
 import { sensorManager } from '../modules/sensors.js';
-import { SimCanvas, loadAR, canRunAR, startARScene } from '../modules/ar-loader.js';
+import { SimCanvas, loadAR, canRunAR, getARSupportInfo, requestCameraPermission, startARScene, destroyARScene } from '../modules/ar-loader.js';
 import { SimpleGraph } from '../modules/graph.js';
 import { showTutorial } from '../modules/tutorial.js';
 import { initLKS } from '../modules/lks.js';
@@ -207,10 +207,22 @@ ctrlGravity.addEventListener('change', (e) => {
 btnDrop.addEventListener('click', triggerDrop);
 btnReset.addEventListener('click', resetExperiment);
 
-});
 
 // ─── Mode Switcher ───
 const modeBtns = document.querySelectorAll('#mode-switcher .mode-btn');
+
+function switchToSim() {
+  destroyARScene();
+  document.body.classList.remove('ar-active');
+  arView.classList.add('hidden');
+  arView.innerHTML = '';
+  simView.classList.remove('hidden');
+  sim.start();
+  mode = 'sim';
+  modeBtns.forEach(b => b.classList.remove('active'));
+  modeBtns[0].classList.add('active');
+}
+
 modeBtns.forEach((btn) => {
   btn.addEventListener('click', async () => {
     const newMode = btn.dataset.mode;
@@ -220,16 +232,15 @@ modeBtns.forEach((btn) => {
     mode = newMode;
 
     if (mode === 'ar') {
-      if (!canRunAR()) {
+      const arInfo = getARSupportInfo();
+      if (!arInfo.supported) {
         arView.classList.remove('hidden');
         simView.classList.add('hidden');
         arView.innerHTML = `
           <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:var(--space-6);text-align:center;gap:var(--space-4);">
-            <div style="font-size:3rem">📵</div>
-            <p style="color:var(--text-secondary);font-size:var(--fs-sm);line-height:1.6">
-              Kamera tidak tersedia atau izin ditolak.<br>
-              Pastikan browser punya akses kamera, lalu muat ulang halaman.
-            </p>
+            <div style="font-size:3rem">${arInfo.isSecure ? '📵' : '🔒'}</div>
+            <p style="color:var(--text-secondary);font-size:var(--fs-sm);line-height:1.6">${arInfo.reason}</p>
+            ${!arInfo.isSecure ? '<p style="color:var(--text-muted);font-size:var(--fs-xs)">Tip: Deploy ke GitHub Pages atau gunakan localhost untuk HTTPS.</p>' : ''}
             <button class="btn btn-primary btn-sm" onclick="location.reload()">🔄 Muat Ulang</button>
           </div>`;
         return;
@@ -237,6 +248,21 @@ modeBtns.forEach((btn) => {
       simView.classList.add('hidden');
       arView.classList.remove('hidden');
       document.body.classList.add('ar-active');
+      arView.innerHTML = '<p style="padding:var(--space-6);text-align:center;color:var(--text-secondary)">Meminta izin kamera...</p>';
+
+      const camResult = await requestCameraPermission();
+      if (!camResult.granted) {
+        arView.innerHTML = `
+          <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:var(--space-6);text-align:center;gap:var(--space-4);">
+            <div style="font-size:3rem">📷</div>
+            <p style="color:var(--text-secondary);font-size:var(--fs-sm);line-height:1.6">${camResult.error}</p>
+            <button class="btn btn-primary btn-sm" onclick="location.reload()">🔄 Coba Lagi</button>
+            <button class="btn btn-secondary btn-sm" id="btn-back-sim">← Kembali ke Simulasi</button>
+          </div>`;
+        document.getElementById('btn-back-sim')?.addEventListener('click', switchToSim);
+        return;
+      }
+
       arView.innerHTML = '<p style="padding:var(--space-6);text-align:center;color:var(--text-secondary)">Memuat AR...</p>';
       const loaded = await loadAR();
       if (loaded) {
@@ -251,14 +277,18 @@ modeBtns.forEach((btn) => {
             <a-text value="h = 1/2 g t^2" position="0 -0.3 0" align="center" color="#D32F2F" width="3" font="monoid"></a-text>
           </a-entity>
         `, {
-          onMarkerFound: () => window.showToast('Marker terdeteksi! 🎉', 'success', 2000)
+          onMarkerFound: () => window.showToast('Marker terdeteksi! 🎉', 'success', 2000),
+          onMarkerLost: () => {},
+          onClose: switchToSim,
+          onError: (msg) => { window.showToast('AR Error: ' + msg, 'error', 5000); switchToSim(); }
         });
         window.showToast('AR aktif! Arahkan ke marker Hiro.', 'info');
-      } else { window.showToast('Gagal memuat AR.', 'error'); modeBtns[0].click(); }
+      } else {
+        window.showToast('Gagal memuat AR. Cek koneksi internet.', 'error');
+        switchToSim();
+      }
     } else {
-      document.body.classList.remove('ar-active');
-      arView.classList.add('hidden'); arView.innerHTML = '';
-      simView.classList.remove('hidden'); sim.start();
+      switchToSim();
     }
   });
 });
