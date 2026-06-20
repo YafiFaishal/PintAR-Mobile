@@ -782,7 +782,8 @@ ul, ol { list-style: none; }
 
 /* When AR is active, hide page content */
 body.ar-active > *:not(a-scene):not(#pintar-ar-close):not(#pintar-ar-info):not(video):not(script):not(link):not(style) {
-  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
 }
 .a-enter-vr, .a-orientation-modal { display: none !important; }
 }
