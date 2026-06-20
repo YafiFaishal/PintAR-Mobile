@@ -221,9 +221,23 @@ modeBtns.forEach((btn) => {
     mode = newMode;
 
     if (mode === 'ar') {
-      if (!canRunAR()) { window.showToast('Kamera tidak tersedia.', 'warning'); modeBtns[0].click(); return; }
+      if (!canRunAR()) {
+        arView.classList.remove('hidden');
+        simView.classList.add('hidden');
+        arView.innerHTML = `
+          <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:var(--space-6);text-align:center;gap:var(--space-4);">
+            <div style="font-size:3rem">📵</div>
+            <p style="color:var(--text-secondary);font-size:var(--fs-sm);line-height:1.6">
+              Kamera tidak tersedia atau izin ditolak.<br>
+              Pastikan browser punya akses kamera, lalu muat ulang halaman.
+            </p>
+            <button class="btn btn-primary btn-sm" onclick="location.reload()">🔄 Muat Ulang</button>
+          </div>`;
+        return;
+      }
       simView.classList.add('hidden');
       arView.classList.remove('hidden');
+      document.body.classList.add('ar-active');
       arView.innerHTML = '<p style="padding:var(--space-6);text-align:center;color:var(--text-secondary)">Memuat AR...</p>';
       const loaded = await loadAR();
       if (loaded) {
@@ -242,6 +256,7 @@ modeBtns.forEach((btn) => {
         window.showToast('AR aktif! Arahkan ke marker.', 'info');
       } else { window.showToast('Gagal memuat AR.', 'error'); modeBtns[0].click(); }
     } else {
+      document.body.classList.remove('ar-active');
       arView.classList.add('hidden'); arView.innerHTML = '';
       simView.classList.remove('hidden'); sim.start();
     }

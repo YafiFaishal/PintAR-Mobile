@@ -371,17 +371,32 @@ modeBtns.forEach((btn) => {
     btn.classList.add('active');
     mode = newMode;
     if (mode === 'ar') {
-      if (!canRunAR()) { window.showToast('Kamera tidak tersedia.', 'warning'); modeBtns[0].click(); return; }
+      if (!canRunAR()) {
+        arView.classList.remove('hidden');
+        simView.classList.add('hidden');
+        arView.innerHTML = `
+          <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:var(--space-6);text-align:center;gap:var(--space-4);">
+            <div style="font-size:3rem">📵</div>
+            <p style="color:var(--text-secondary);font-size:var(--fs-sm);line-height:1.6">
+              Kamera tidak tersedia atau izin ditolak.<br>
+              Pastikan browser punya akses kamera, lalu muat ulang halaman.
+            </p>
+            <button class="btn btn-primary btn-sm" onclick="location.reload()">🔄 Muat Ulang</button>
+          </div>`;
+        return;
+      }
       simView.classList.add('hidden');
       arView.classList.remove('hidden');
+      document.body.classList.add('ar-active');
       arView.innerHTML = '<p style="padding:var(--space-6);text-align:center;color:var(--text-secondary)">Memuat AR...</p>';
       const loaded = await loadAR();
       if (loaded) {
         const col = currentReaction.colorStart;
-        arView.innerHTML = `<a-scene embedded arjs="sourceType:webcam;debugUIEnabled:false;" vr-mode-ui="enabled:false" style="position:absolute;top:0;left:0;width:100%;height:100%;overflow:hidden;"><a-marker preset="hiro"><a-entity rotation="-60 0 0" scale="0.4 0.4 0.4"><a-cylinder position="0 0 0" radius="0.8" height="0.05" color="#e2e8f0"></a-cylinder><a-cylinder position="0 0.6 0" radius="0.5" height="1.2" color="#a5f3fc" material="transparent:true;opacity:0.25;side:double"></a-cylinder><a-cylinder position="0 0.4 0" radius="0.45" height="0.8" color="rgb(${col[0]},${col[1]},${col[2]})" material="transparent:true;opacity:0.7"></a-cylinder><a-box position="-0.2 0.3 0" width="0.12" height="0.5" depth="0.12" color="#94a3b8"></a-box></a-entity></a-marker><a-entity camera></a-entity></a-scene>`;
+        arView.innerHTML = `<a-scene embedded arjs="sourceType: webcam; facingMode: environment; debugUIEnabled: false;" vr-mode-ui="enabled:false" style="position:absolute;top:0;left:0;width:100%;height:100%;overflow:hidden;"><a-marker preset="hiro"><a-entity rotation="-60 0 0" scale="0.4 0.4 0.4"><a-cylinder position="0 0 0" radius="0.8" height="0.05" color="#e2e8f0"></a-cylinder><a-cylinder position="0 0.6 0" radius="0.5" height="1.2" color="#a5f3fc" material="transparent:true;opacity:0.25;side:double"></a-cylinder><a-cylinder position="0 0.4 0" radius="0.45" height="0.8" color="rgb(${col[0]},${col[1]},${col[2]})" material="transparent:true;opacity:0.7"></a-cylinder><a-box position="-0.2 0.3 0" width="0.12" height="0.5" depth="0.12" color="#94a3b8"></a-box></a-entity></a-marker><a-entity camera></a-entity></a-scene>`;
         window.showToast('AR aktif! Arahkan kamera ke marker Hiro.', 'info');
       } else { window.showToast('Gagal memuat AR.', 'error'); modeBtns[0].click(); }
     } else {
+      document.body.classList.remove('ar-active');
       arView.classList.add('hidden'); arView.innerHTML = '';
       simView.classList.remove('hidden'); sim.start();
     }

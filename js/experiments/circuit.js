@@ -360,15 +360,29 @@ modeBtns.forEach((btn) => {
     btn.classList.add('active');
     mode = newMode;
     if (mode === 'ar') {
-      if (!canRunAR()) { window.showToast('Kamera tidak tersedia.', 'warning'); modeBtns[0].click(); return; }
+      if (!canRunAR()) {
+        arView.classList.remove('hidden');
+        simView.classList.add('hidden');
+        arView.innerHTML = `
+          <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:var(--space-6);text-align:center;gap:var(--space-4);">
+            <div style="font-size:3rem">📵</div>
+            <p style="color:var(--text-secondary);font-size:var(--fs-sm);line-height:1.6">
+              Kamera tidak tersedia atau izin ditolak.<br>
+              Pastikan browser punya akses kamera, lalu muat ulang halaman.
+            </p>
+            <button class="btn btn-primary btn-sm" onclick="location.reload()">🔄 Muat Ulang</button>
+          </div>`;
+        return;
+      }
       simView.classList.add('hidden'); arView.classList.remove('hidden');
       arView.innerHTML = '<p style="padding:var(--space-6);text-align:center;color:var(--text-secondary)">Memuat AR...</p>';
       const loaded = await loadAR();
       if (loaded) {
-        arView.innerHTML = `<a-scene embedded arjs="sourceType:webcam;debugUIEnabled:false;" vr-mode-ui="enabled:false" style="position:absolute;top:0;left:0;width:100%;height:100%;overflow:hidden;"><a-marker preset="hiro"><a-entity rotation="-90 0 0" scale="0.5 0.5 0.5"><a-box position="-0.5 0 0" width="0.3" height="0.1" depth="0.2" color="#64748b"></a-box><a-box position="0 0 0" width="0.3" height="0.1" depth="0.2" color="#64748b"></a-box><a-box position="0.5 0 0" width="0.3" height="0.1" depth="0.2" color="#64748b"></a-box><a-sphere position="0 0.5 0" radius="0.15" color="#FFD600" material="emissive:#FFD600;emissiveIntensity:${Math.min(1, Itotal*10).toFixed(2)}"></a-sphere></a-entity></a-marker><a-entity camera></a-entity></a-scene>`;
+        arView.innerHTML = `<a-scene embedded arjs="sourceType: webcam; facingMode: environment; debugUIEnabled: false;" vr-mode-ui="enabled:false" style="position:absolute;top:0;left:0;width:100%;height:100%;overflow:hidden;"><a-marker preset="hiro"><a-entity rotation="-90 0 0" scale="0.5 0.5 0.5"><a-box position="-0.5 0 0" width="0.3" height="0.1" depth="0.2" color="#64748b"></a-box><a-box position="0 0 0" width="0.3" height="0.1" depth="0.2" color="#64748b"></a-box><a-box position="0.5 0 0" width="0.3" height="0.1" depth="0.2" color="#64748b"></a-box><a-sphere position="0 0.5 0" radius="0.15" color="#FFD600" material="emissive:#FFD600;emissiveIntensity:${Math.min(1, Itotal*10).toFixed(2)}"></a-sphere></a-entity></a-marker><a-entity camera></a-entity></a-scene>`;
         window.showToast('AR aktif!', 'info');
       } else { window.showToast('Gagal memuat AR.', 'error'); modeBtns[0].click(); }
     } else {
+      document.body.classList.remove('ar-active');
       arView.classList.add('hidden'); arView.innerHTML = '';
       simView.classList.remove('hidden'); sim.start();
     }
