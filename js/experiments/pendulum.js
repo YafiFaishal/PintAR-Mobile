@@ -230,6 +230,40 @@ btnReset.addEventListener('click', resetPendulum);
 // Sheet is handled globally by app.js initBottomSheet()
 
 
+// ─── Fix AR.js video shift on mobile ───
+// AR.js injects <video> directly into <body> with position:fixed.
+// We move it inside the ar-viewport so it's contained and sized correctly.
+function fixARVideoPosition(container) {
+  const bodyVideo = document.querySelector('body > video');
+  if (bodyVideo && container) {
+    bodyVideo.style.cssText = `
+      position: absolute !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: cover !important;
+      z-index: 0 !important;
+    `;
+    container.insertBefore(bodyVideo, container.firstChild);
+  }
+  // Also fix any canvas AR.js added to body
+  const bodyCanvas = document.querySelector('body > canvas');
+  if (bodyCanvas && container) {
+    bodyCanvas.style.cssText = `
+      position: absolute !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: cover !important;
+      z-index: 1 !important;
+    `;
+    container.insertBefore(bodyCanvas, container.firstChild);
+  }
+}
+
+
 // ─── Mode Switcher (Sim / AR) ───
 let arInstance = null;
 const modeBtns = document.querySelectorAll('#mode-switcher .mode-btn');
@@ -244,8 +278,19 @@ modeBtns.forEach((btn) => {
 
     if (mode === 'ar') {
       if (!canRunAR()) {
-        window.showToast('HP kamu tidak punya kamera. Pakai mode Simulasi.', 'warning');
-        modeBtns[0].click();
+        // Kamera tidak tersedia — tampilkan pesan tapi JANGAN paksa balik ke simulasi
+        // Siswa tetap bisa pilih mode, simulasi masih tersedia lewat tab Simulasi
+        arView.classList.remove('hidden');
+        simView.classList.add('hidden');
+        arView.innerHTML = `
+          <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:var(--space-6);text-align:center;gap:var(--space-4);">
+            <div style="font-size:3rem">📵</div>
+            <p style="color:var(--text-secondary);font-size:var(--fs-sm);line-height:1.6">
+              Kamera tidak tersedia atau izin ditolak.<br>
+              Pastikan browser punya akses kamera, lalu muat ulang halaman.
+            </p>
+            <button class="btn btn-primary btn-sm" onclick="location.reload()">🔄 Muat Ulang</button>
+          </div>`;
         return;
       }
       sim.stop();
@@ -259,9 +304,17 @@ modeBtns.forEach((btn) => {
           onMarkerFound: () => window.showToast('Marker terdeteksi! 🎉', 'success', 2000),
           onMarkerLost: () => {}
         });
+        // Fix: AR.js injects <video> into <body> — move it inside ar-viewport
+        setTimeout(() => fixARVideoPosition(arView), 800);
       } else {
         window.showToast('Gagal memuat AR. Cek koneksi internet.', 'error');
-        modeBtns[0].click();
+        // Kembali ke simulasi manual jika AR gagal load
+        arView.classList.add('hidden');
+        simView.classList.remove('hidden');
+        sim.start();
+        modeBtns.forEach(b => b.classList.remove('active'));
+        modeBtns[0].classList.add('active');
+        mode = 'sim';
       }
     } else {
       if (arInstance) { arInstance.destroy(); arInstance = null; }
