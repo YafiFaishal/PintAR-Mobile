@@ -231,7 +231,7 @@ modeBtns.forEach((btn) => {
       arView.innerHTML = '<p style="padding:var(--space-6);text-align:center;color:var(--text-secondary)">Memuat AR...</p>';
       const loaded = await loadAR();
       if (loaded) {
-        arView.innerHTML = `<a-scene embedded arjs="sourceType:webcam;debugUIEnabled:false;" vr-mode-ui="enabled:false" style="width:100%;height:100%;"><a-marker preset="hiro"><a-entity rotation="-60 0 0" scale="0.3 0.3 0.3"><a-plane position="0 0 0" rotation="-90 0 0" width="3" height="3" color="#e2e8f0"></a-plane><a-cylinder position="-0.8 2 0" radius="0.04" height="4" color="#94a3b8"></a-cylinder><a-sphere id="ar-ball" position="0 4 0" radius="0.15" color="${obj.color}"></a-sphere></a-entity></a-marker><a-entity camera></a-entity></a-scene>`;
+        arView.innerHTML = `<a-scene embedded arjs="sourceType:webcam;debugUIEnabled:false;" vr-mode-ui="enabled:false" style="position:absolute;top:0;left:0;width:100%;height:100%;overflow:hidden;"><a-marker preset="hiro"><a-entity rotation="-60 0 0" scale="0.3 0.3 0.3"><a-plane position="0 0 0" rotation="-90 0 0" width="3" height="3" color="#e2e8f0"></a-plane><a-cylinder position="-0.8 2 0" radius="0.04" height="4" color="#94a3b8"></a-cylinder><a-sphere id="ar-ball" position="0 4 0" radius="0.15" color="${obj.color}"></a-sphere></a-entity></a-marker><a-entity camera></a-entity></a-scene>`;
         window.showToast('AR aktif! Arahkan ke marker Hiro.', 'info');
       } else { window.showToast('Gagal memuat AR.', 'error'); modeBtns[0].click(); }
     } else {

@@ -233,7 +233,7 @@ modeBtns.forEach((btn) => {
       const loaded = await loadAR();
       if (loaded) {
         const col = currentReaction.startColor;
-        arView.innerHTML = `<a-scene embedded arjs="sourceType:webcam;debugUIEnabled:false;" vr-mode-ui="enabled:false" style="width:100%;height:100%;"><a-marker preset="hiro"><a-entity rotation="-60 0 0" scale="0.4 0.4 0.4"><a-cylinder position="0 0 0" radius="0.8" height="0.05" color="#e2e8f0"></a-cylinder><a-cylinder position="0 0.5 0" radius="0.5" height="1" color="#a5f3fc" material="transparent:true;opacity:0.3"></a-cylinder><a-cylinder id="ar-liquid" position="0 0.4 0" radius="0.45" height="0.8" color="rgb(${col[0]},${col[1]},${col[2]})" material="transparent:true;opacity:0.8"></a-cylinder></a-entity></a-marker><a-entity camera></a-entity></a-scene>`;
+        arView.innerHTML = `<a-scene embedded arjs="sourceType:webcam;debugUIEnabled:false;" vr-mode-ui="enabled:false" style="position:absolute;top:0;left:0;width:100%;height:100%;overflow:hidden;"><a-marker preset="hiro"><a-entity rotation="-60 0 0" scale="0.4 0.4 0.4"><a-cylinder position="0 0 0" radius="0.8" height="0.05" color="#e2e8f0"></a-cylinder><a-cylinder position="0 0.5 0" radius="0.5" height="1" color="#a5f3fc" material="transparent:true;opacity:0.3"></a-cylinder><a-cylinder id="ar-liquid" position="0 0.4 0" radius="0.45" height="0.8" color="rgb(${col[0]},${col[1]},${col[2]})" material="transparent:true;opacity:0.8"></a-cylinder></a-entity></a-marker><a-entity camera></a-entity></a-scene>`;
         window.showToast('AR aktif! Arahkan ke marker.', 'info');
       } else { window.showToast('Gagal memuat AR.', 'error'); modeBtns[0].click(); }
     } else {

@@ -277,7 +277,7 @@ modeBtns.forEach((btn) => {
 
 function createARScene() {
   return `
-    <a-scene embedded arjs="sourceType:webcam;debugUIEnabled:false;" renderer="antialias:true;alpha:true" vr-mode-ui="enabled:false" style="width:100%;height:100%;">
+    <a-scene embedded arjs="sourceType:webcam;debugUIEnabled:false;" renderer="antialias:true;alpha:true" vr-mode-ui="enabled:false" style="position:absolute;top:0;left:0;width:100%;height:100%;overflow:hidden;">
       <a-marker preset="hiro">
         <a-entity rotation="-60 0 0" scale="0.4 0.4 0.4">
           <a-cylinder position="0 0 0" radius="0.4" height="0.08" color="#e2e8f0"></a-cylinder>

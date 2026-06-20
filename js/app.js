@@ -34,9 +34,16 @@ function initTheme() {
     btn.addEventListener('click', () => {
       const current = document.documentElement.getAttribute('data-theme');
       const next = current === 'dark' ? 'light' : 'dark';
-      document.documentElement.setAttribute('data-theme', next);
+      if (next === 'light') {
+        document.documentElement.removeAttribute('data-theme');
+      } else {
+        document.documentElement.setAttribute('data-theme', next);
+      }
       localStorage.setItem('pintar_theme', next);
       btn.textContent = next === 'dark' ? '☀️' : '🌙';
+      // Update meta theme-color
+      const meta = document.querySelector('meta[name="theme-color"]');
+      if (meta) meta.content = next === 'dark' ? '#1e293b' : '#0066FF';
     });
 
     // Set initial icon
