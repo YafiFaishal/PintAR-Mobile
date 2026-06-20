@@ -780,26 +780,11 @@ ul, ol { list-style: none; }
   width: 100%;
 }
 
-/* ── AR overlay injected to body by ar-loader.js ──
-   The #ar-root div is position:fixed appended to body.
-   AR.js also injects body > video — keep it fullscreen. */
-body > video {
-  position: fixed !important;
-  top: 0 !important; left: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: cover !important;
-  z-index: 99 !important;
+/* When AR is active, hide page content */
+body.ar-active > *:not(a-scene):not(#pintar-ar-close):not(#pintar-ar-info):not(video):not(script):not(link):not(style) {
+  display: none !important;
 }
-
-/* A-Frame renders a canvas — ensure it fills screen */
-body > #ar-root canvas,
-body > #ar-root .a-canvas {
-  position: absolute !important;
-  top: 0 !important; left: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: cover !important;
+.a-enter-vr, .a-orientation-modal { display: none !important; }
 }
 
 /* Canvas fallback for non-AR mode */
