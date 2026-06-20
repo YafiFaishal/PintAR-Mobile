@@ -119,6 +119,27 @@ function detectBrowser() {
 
 // ─── Public: Request camera permission explicitly ────────────────
 export async function requestCameraPermission() {
+  // On iOS 13+, also request motion sensor permission
+  // This prevents A-Frame from showing its own blocking dialog
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  if (isIOS && typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+    try {
+      const motionPerm = await DeviceMotionEvent.requestPermission();
+      console.log('[PintAR] iOS motion sensor permission:', motionPerm);
+    } catch (e) {
+      console.warn('[PintAR] iOS motion permission request failed (non-blocking):', e);
+    }
+  }
+  if (isIOS && typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+    try {
+      const orientPerm = await DeviceOrientationEvent.requestPermission();
+      console.log('[PintAR] iOS orientation permission:', orientPerm);
+    } catch (e) {
+      console.warn('[PintAR] iOS orientation permission request failed (non-blocking):', e);
+    }
+  }
+
+  // Now request camera
   try {
     const stream = await navigator.mediaDevices.getUserMedia({
       video: { facingMode: 'environment' }
@@ -259,10 +280,11 @@ function stopVideoWatcher() {
  * - sourceWidth/sourceHeight for consistent video resolution
  * - patternRatio for better marker detection
  * - maxDetectionRate for performance balance
+ * - iOS motion sensor permission handled before scene starts
  *
  * @param {HTMLElement} container - reference div (lifecycle only)
  * @param {string} markerContent - A-Frame entities HTML inside <a-marker>
- * @param {object} options - { onMarkerFound, onMarkerLost, onError }
+ * @param {object} options - { onMarkerFound, onMarkerLost, onError, onClose }
  */
 export function startARScene(container, markerContent, options = {}) {
   if (!arLoaded) {
@@ -275,6 +297,16 @@ export function startARScene(container, markerContent, options = {}) {
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
   const isAndroid = /Android/i.test(navigator.userAgent);
 
+  // ── Request iOS motion sensor permission BEFORE creating scene ──
+  // This prevents A-Frame's own dialog from appearing and blocking the UI
+  if (isIOS && typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+    DeviceMotionEvent.requestPermission().then(state => {
+      console.log('[PintAR] iOS motion permission:', state);
+    }).catch(e => {
+      console.warn('[PintAR] iOS motion permission error (non-blocking):', e);
+    });
+  }
+
   // ── Fullscreen overlay ──
   const root = document.createElement('div');
   root.id = 'ar-root';
@@ -282,13 +314,13 @@ export function startARScene(container, markerContent, options = {}) {
   document.body.appendChild(root);
   arRootEl = root;
 
-  // Scene wrapper with pointer events
+  // Scene wrapper
   const sceneWrap = document.createElement('div');
-  sceneWrap.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:9999;pointer-events:auto;';
+  sceneWrap.id = 'ar-scene-wrap';
+  sceneWrap.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;';
   root.appendChild(sceneWrap);
 
   // AR.js config optimized for mobile
-  // Lower sourceWidth/Height for better performance on older devices
   const sourceWidth = isIOS ? 640 : 800;
   const sourceHeight = isIOS ? 480 : 600;
 
@@ -310,7 +342,7 @@ export function startARScene(container, markerContent, options = {}) {
       renderer="antialias: true; alpha: true; precision: ${isIOS ? 'highp' : 'mediump'}; logarithmicDepthBuffer: true;"
       vr-mode-ui="enabled: false"
       loading-screen="enabled: false"
-      gesture-detector
+      device-orientation-permission-ui="enabled: false"
     >
       <a-marker preset="hiro" id="ar-hiro-marker" smooth="true" smoothCount="5" smoothTolerance="0.01" smoothThreshold="2">
         ${markerContent}
@@ -321,23 +353,38 @@ export function startARScene(container, markerContent, options = {}) {
     </a-scene>
   `;
 
-  // ── Close button (always accessible) ──
+  // ── Close button — HIGHEST z-index, always clickable ──
   const closeBtn = document.createElement('button');
   closeBtn.id = 'ar-close-btn';
   closeBtn.innerHTML = '✕ Tutup AR';
   closeBtn.style.cssText = `
-    position: fixed; top: 16px; right: 16px; z-index: 10001;
-    padding: 10px 18px; border-radius: 24px; border: none;
-    background: rgba(0,0,0,0.7); color: #fff; font-size: 14px;
-    font-weight: 600; cursor: pointer; pointer-events: auto;
-    backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    position: fixed; top: 16px; right: 16px; z-index: 2147483647;
+    padding: 12px 20px; border-radius: 24px; border: 2px solid rgba(255,255,255,0.3);
+    background: rgba(0,0,0,0.85); color: #fff; font-size: 14px;
+    font-weight: 700; cursor: pointer; pointer-events: auto;
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    -webkit-tap-highlight-color: rgba(255,255,255,0.2);
+    touch-action: manipulation;
+    user-select: none; -webkit-user-select: none;
   `;
-  closeBtn.addEventListener('click', () => {
+
+  function handleClose(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+    console.log('[PintAR] Close button pressed');
     destroyARScene();
     if (options.onClose) options.onClose();
-  });
-  root.appendChild(closeBtn);
+  }
+
+  // Use multiple event types for reliability on mobile
+  closeBtn.addEventListener('click', handleClose, { capture: true });
+  closeBtn.addEventListener('touchend', handleClose, { capture: true, passive: false });
+
+  // Append close button directly to body (NOT inside ar-root)
+  // This ensures it's never blocked by A-Frame's scene elements
+  document.body.appendChild(closeBtn);
 
   // ── Scan overlay ──
   const scanOverlay = document.createElement('div');
@@ -407,27 +454,43 @@ export function destroyARScene() {
         v.srcObject.getTracks().forEach(t => t.stop());
         v.srcObject = null;
       }
+      v.pause();
     } catch(e) { /* ignore */ }
   });
+
+  // Remove close button (it's on body, not in ar-root)
+  const closeBtn = document.getElementById('ar-close-btn');
+  if (closeBtn) closeBtn.remove();
 
   // Remove AR overlay
   const existing = document.getElementById('ar-root');
   if (existing) existing.remove();
 
+  // Destroy A-Frame scene properly to release WebGL context
+  document.querySelectorAll('a-scene').forEach(scene => {
+    try {
+      if (scene.renderer) {
+        scene.renderer.forceContextLoss();
+        scene.renderer.dispose();
+      }
+    } catch(e) {}
+    scene.remove();
+  });
+
   // Clean orphaned elements AR.js may have left
-  document.querySelectorAll('body > a-scene').forEach(el => el.remove());
   document.querySelectorAll('body > video').forEach(el => {
     try {
       if (el.srcObject) el.srcObject.getTracks().forEach(t => t.stop());
+      el.pause();
     } catch(e) {}
     el.remove();
   });
   document.querySelectorAll('body > canvas').forEach(el => {
-    // Only remove canvases that look like they belong to AR.js
     if (el.classList.contains('a-canvas') || !el.id) el.remove();
   });
 
   arRootEl = null;
+  console.log('[PintAR] AR scene destroyed');
 }
 
 // ─── SimCanvas (2D fallback renderer) ────────────────────────────

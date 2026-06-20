@@ -780,6 +780,31 @@ ul, ol { list-style: none; }
   width: 100%;
 }
 
+/* ── Suppress A-Frame's device orientation permission dialog ──
+   We handle this permission ourselves before starting the scene */
+.a-orientation-modal,
+[data-a-orientation-modal],
+.a-dialog-allow-button,
+.a-dialog-deny-button,
+.a-dialog-ok-button,
+.a-modal {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* ── AR Close button — always on top of everything ── */
+#ar-close-btn {
+  position: fixed !important;
+  top: 16px !important;
+  right: 16px !important;
+  z-index: 2147483647 !important;
+  pointer-events: auto !important;
+  display: block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
 /* ── AR overlay injected to body by ar-loader.js ──
    The #ar-root div is position:fixed appended to body.
    AR.js also injects body > video — keep it fullscreen. */
