@@ -217,7 +217,8 @@ function switchToSim() {
   arView.classList.add('hidden');
   arView.innerHTML = '';
   simView.classList.remove('hidden');
-  sim.start();
+  // Delay to let DOM settle before resizing canvas
+  setTimeout(() => { sim.start(); }, 100);
   mode = 'sim';
   modeBtns.forEach(b => b.classList.remove('active'));
   modeBtns[0].classList.add('active');
