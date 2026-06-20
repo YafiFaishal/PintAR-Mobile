@@ -296,6 +296,7 @@ modeBtns.forEach((btn) => {
       sim.stop();
       simView.classList.add('hidden');
       arView.classList.remove('hidden');
+      document.body.classList.add('ar-active'); // fullscreen AR
       arView.innerHTML = '<p style="padding:var(--space-6);text-align:center;color:var(--text-secondary)">Memuat AR... Tunggu sebentar.</p>';
 
       const loaded = await loadAR();
@@ -304,8 +305,6 @@ modeBtns.forEach((btn) => {
           onMarkerFound: () => window.showToast('Marker terdeteksi! 🎉', 'success', 2000),
           onMarkerLost: () => {}
         });
-        // Fix: AR.js injects <video> into <body> — move it inside ar-viewport
-        setTimeout(() => fixARVideoPosition(arView), 800);
       } else {
         window.showToast('Gagal memuat AR. Cek koneksi internet.', 'error');
         // Kembali ke simulasi manual jika AR gagal load
@@ -318,6 +317,7 @@ modeBtns.forEach((btn) => {
       }
     } else {
       if (arInstance) { arInstance.destroy(); arInstance = null; }
+      document.body.classList.remove('ar-active'); // exit fullscreen
       arView.classList.add('hidden');
       arView.innerHTML = '';
       simView.classList.remove('hidden');

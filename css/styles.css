@@ -770,6 +770,7 @@ ul, ol { list-style: none; }
 }
 
 /* AR viewport area */
+/* AR viewport — normal (non-AR mode): just a placeholder, hidden */
 .ar-viewport {
   flex: 1;
   position: relative;
@@ -780,8 +781,19 @@ ul, ol { list-style: none; }
   width: 100%;
 }
 
-/* Force all AR.js injected elements into container */
-.ar-viewport a-scene {
+/* AR mode ACTIVE — ar-view goes fullscreen behind the header/bottom-sheet */
+body.ar-active .ar-viewport {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100dvh !important;
+  height: 100vh !important; /* fallback */
+  z-index: 100 !important;
+  overflow: hidden !important;
+}
+
+/* In AR mode, a-scene fills the whole fixed viewport */
+body.ar-active .ar-viewport a-scene {
   position: absolute !important;
   top: 0 !important;
   left: 0 !important;
@@ -789,27 +801,27 @@ ul, ol { list-style: none; }
   height: 100% !important;
 }
 
-/* AR.js injects canvas with class a-canvas */
-.ar-viewport canvas,
-.ar-viewport .a-canvas {
-  position: absolute !important;
+/* AR.js injects video at body level — force it fullscreen */
+body.ar-active > video {
+  position: fixed !important;
   top: 0 !important;
   left: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
-  max-width: 100% !important;
+  width: 100vw !important;
+  height: 100dvh !important;
+  height: 100vh !important;
   object-fit: cover !important;
+  z-index: 99 !important;
 }
 
-/* AR.js injects a <video> element for camera feed — must fill container */
-.ar-viewport video {
+/* AR.js canvas covers full viewport */
+body.ar-active .ar-viewport canvas,
+body.ar-active .ar-viewport .a-canvas {
   position: absolute !important;
   top: 0 !important;
   left: 0 !important;
   width: 100% !important;
   height: 100% !important;
   object-fit: cover !important;
-  z-index: 0 !important;
 }
 
 /* Canvas fallback for non-AR mode */
@@ -1304,42 +1316,6 @@ body:has(.bottom-sheet.open) .lks-fab {
 .ar-scan-hint {
   color: rgba(255,255,255,0.6);
   font-size: var(--fs-xs);
-}
-
-/* AR viewport adjustments when scene is active — mobile fix */
-.ar-viewport {
-  position: relative;
-  isolation: isolate;
-}
-
-.ar-viewport a-scene {
-  position: absolute !important;
-  top: 0 !important;
-  left: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
-}
-
-/* Catch AR.js canvas regardless of class name */
-.ar-viewport canvas,
-.ar-viewport .a-canvas {
-  position: absolute !important;
-  top: 0 !important;
-  left: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: cover !important;
-}
-
-/* AR.js video feed — must fill container on all mobile browsers */
-.ar-viewport video {
-  position: absolute !important;
-  top: 0 !important;
-  left: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: cover !important;
-  z-index: 0 !important;
 }
 
 

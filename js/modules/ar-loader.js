@@ -76,10 +76,6 @@ export function startARScene(container, markerContent, options = {}) {
   destroyARScene();
 
   // Build the full AR HTML
-  // Get container dimensions for AR source sizing
-  const cw = container.offsetWidth  || window.innerWidth;
-  const ch = container.offsetHeight || Math.round(window.innerHeight * 0.4);
-
   container.innerHTML = `
     <!-- Scan Overlay -->
     <div class="ar-scan-overlay" id="ar-scan-overlay">
@@ -95,7 +91,7 @@ export function startARScene(container, markerContent, options = {}) {
     <!-- A-Frame AR Scene -->
     <a-scene
       embedded
-      arjs="sourceType: webcam; facingMode: environment; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3; displayWidth: ${cw}; displayHeight: ${ch};"
+      arjs="sourceType: webcam; facingMode: environment; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;"
       renderer="antialias: true; alpha: true; precision: mediump;"
       vr-mode-ui="enabled: false"
       loading-screen="enabled: false"
