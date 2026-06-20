@@ -147,23 +147,38 @@ export function startARScene(container, markerContent, options = {}) {
 }
 
 export function destroyARScene() {
+  // 1. Stop camera streams inside scene
   const scene = document.getElementById('pintar-ar-scene');
   if (scene) {
-    scene.querySelectorAll('video').forEach(v => { try { if (v.srcObject) v.srcObject.getTracks().forEach(t => t.stop()); v.pause(); } catch(e){} });
+    scene.querySelectorAll('video').forEach(v => {
+      try { if (v.srcObject) { v.srcObject.getTracks().forEach(t => t.stop()); v.srcObject = null; } v.pause(); } catch(e){}
+    });
     scene.remove();
   }
-  document.querySelectorAll('body > video').forEach(v => { try { if (v.srcObject) v.srcObject.getTracks().forEach(t => t.stop()); v.pause(); } catch(e){} v.remove(); });
+
+  // 2. Remove orphan video elements AR.js injects into body
+  document.querySelectorAll('body > video').forEach(v => {
+    try { if (v.srcObject) { v.srcObject.getTracks().forEach(t => t.stop()); v.srcObject = null; } v.pause(); } catch(e){}
+    v.remove();
+  });
+
+  // 3. Remove orphan canvas elements
+  document.querySelectorAll('body > canvas.a-canvas, body > canvas:not([id])').forEach(c => c.remove());
+
+  // 4. Remove UI elements
   const btn = document.getElementById('pintar-ar-close'); if (btn) btn.remove();
   const info = document.getElementById('pintar-ar-info'); if (info) info.remove();
-  
-  // Restore body scroll
+
+  // 5. Reset ALL inline styles AR.js adds to html and body
+  document.documentElement.style.cssText = '';
+  document.body.style.cssText = '';
   document.body.classList.remove('ar-active');
-  document.body.style.overflow = '';
-  document.body.style.position = '';
-  document.body.style.width = '';
-  document.body.style.top = '';
-  
-  // Restore scroll position
+
+  // 6. Remove any A-Frame/AR.js leftover attributes
+  document.body.removeAttribute('style');
+  document.documentElement.removeAttribute('style');
+
+  // 7. Restore scroll position
   if (window._pintarScrollY !== undefined) {
     window.scrollTo(0, window._pintarScrollY);
     window._pintarScrollY = undefined;
