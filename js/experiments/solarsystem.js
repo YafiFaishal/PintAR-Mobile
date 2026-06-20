@@ -257,7 +257,45 @@ modeBtns.forEach((btn) => {
       arView.innerHTML = '<p style="padding:var(--space-6);text-align:center;color:var(--text-secondary)">Memuat AR...</p>';
       const loaded = await loadAR();
       if (loaded) {
-        startARScene(arView, `<a-entity scale="0.3 0.3 0.3"><a-sphere position="0 0 0" radius="0.3" color="#FFD600" material="emissive:#FF8C00;emissiveIntensity:0.8"></a-sphere><a-sphere position="1 0 0" radius="0.08" color="#4169E1" animation="property:rotation;to:0 360 0;dur:${planets[selectedPlanet].T * 3000};loop:true;easing:linear"></a-sphere></a-entity>`, {
+        startARScene(arView, `
+          <a-entity scale="0.15 0.15 0.15">
+            <!-- Matahari -->
+            <a-sphere position="0 0 0" radius="0.5" color="#FFD600" material="emissive:#FF8C00;emissiveIntensity:0.9"></a-sphere>
+            <!-- Merkurius -->
+            <a-entity animation="property:rotation;to:0 360 0;dur:2400;loop:true;easing:linear">
+              <a-sphere position="1 0 0" radius="0.06" color="#A0522D"></a-sphere>
+            </a-entity>
+            <a-ring position="0 0 0" rotation="-90 0 0" radius-inner="0.98" radius-outer="1.02" color="#666" material="opacity:0.4;side:double"></a-ring>
+            <!-- Venus -->
+            <a-entity animation="property:rotation;to:0 360 0;dur:4000;loop:true;easing:linear">
+              <a-sphere position="1.5 0 0" radius="0.09" color="#DEB887"></a-sphere>
+            </a-entity>
+            <a-ring position="0 0 0" rotation="-90 0 0" radius-inner="1.48" radius-outer="1.52" color="#666" material="opacity:0.3;side:double"></a-ring>
+            <!-- Bumi -->
+            <a-entity animation="property:rotation;to:0 360 0;dur:6000;loop:true;easing:linear">
+              <a-sphere position="2 0 0" radius="0.1" color="#4169E1"></a-sphere>
+            </a-entity>
+            <a-ring position="0 0 0" rotation="-90 0 0" radius-inner="1.98" radius-outer="2.02" color="#4169E1" material="opacity:0.4;side:double"></a-ring>
+            <!-- Mars -->
+            <a-entity animation="property:rotation;to:0 360 0;dur:9000;loop:true;easing:linear">
+              <a-sphere position="2.6 0 0" radius="0.08" color="#CD5C5C"></a-sphere>
+            </a-entity>
+            <a-ring position="0 0 0" rotation="-90 0 0" radius-inner="2.58" radius-outer="2.62" color="#666" material="opacity:0.3;side:double"></a-ring>
+            <!-- Jupiter -->
+            <a-entity animation="property:rotation;to:0 360 0;dur:18000;loop:true;easing:linear">
+              <a-sphere position="3.5 0 0" radius="0.25" color="#DAA520"></a-sphere>
+            </a-entity>
+            <a-ring position="0 0 0" rotation="-90 0 0" radius-inner="3.48" radius-outer="3.52" color="#666" material="opacity:0.3;side:double"></a-ring>
+            <!-- Saturnus + cincin -->
+            <a-entity animation="property:rotation;to:0 360 0;dur:30000;loop:true;easing:linear">
+              <a-sphere position="4.5 0 0" radius="0.2" color="#F4A460"></a-sphere>
+              <a-ring position="4.5 0 0" rotation="-75 0 0" radius-inner="0.25" radius-outer="0.38" color="#C8A96E" material="opacity:0.6;side:double"></a-ring>
+            </a-entity>
+            <a-ring position="0 0 0" rotation="-90 0 0" radius-inner="4.48" radius-outer="4.52" color="#666" material="opacity:0.2;side:double"></a-ring>
+            <!-- Label -->
+            <a-text value="Tata Surya - Hukum Kepler" position="0 -1 0" align="center" color="#fff" width="6"></a-text>
+          </a-entity>
+        `, {
           onMarkerFound: () => window.showToast('Marker terdeteksi! 🎉', 'success', 2000),
           onMarkerLost: () => {},
           onClose: switchToSim,

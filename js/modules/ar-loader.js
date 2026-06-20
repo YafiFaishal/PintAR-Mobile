@@ -82,7 +82,14 @@ export function startARScene(container, markerContent, options = {}) {
   if (!arLoaded) return null;
   destroyARScene();
 
+  // Save scroll position before hiding content
+  window._pintarScrollY = window.scrollY;
   document.body.classList.add('ar-active');
+  // Prevent body scroll during AR
+  document.body.style.overflow = 'hidden';
+  document.body.style.position = 'fixed';
+  document.body.style.width = '100%';
+  document.body.style.top = `-${window._pintarScrollY}px`;
 
   // a-scene directly in body — exactly like ar-test.html
   const scene = document.createElement('a-scene');
@@ -108,15 +115,15 @@ export function startARScene(container, markerContent, options = {}) {
   const closeBtn = document.createElement('button');
   closeBtn.id = 'pintar-ar-close';
   closeBtn.textContent = '✕ Tutup AR';
-  closeBtn.style.cssText = 'position:fixed;top:12px;right:12px;z-index:999999;padding:10px 18px;border-radius:20px;border:none;background:rgba(220,38,38,0.9);color:#fff;font-size:14px;font-weight:bold;cursor:pointer;';
+  closeBtn.style.cssText = 'position:fixed;top:12px;right:12px;z-index:999999;padding:12px 20px;border-radius:24px;border:2px solid rgba(255,255,255,0.3);background:rgba(220,38,38,0.9);color:#fff;font-size:14px;font-weight:bold;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.4);';
   closeBtn.onclick = () => { destroyARScene(); if (options.onClose) options.onClose(); };
   document.body.appendChild(closeBtn);
 
-  // Info bar
+  // Info bar with scan instructions
   const info = document.createElement('div');
   info.id = 'pintar-ar-info';
-  info.style.cssText = 'position:fixed;bottom:12px;left:12px;right:12px;z-index:999999;padding:12px;background:rgba(0,0,0,0.7);color:#fff;border-radius:10px;text-align:center;font-size:13px;pointer-events:none;';
-  info.textContent = 'Arahkan kamera ke marker Hiro...';
+  info.style.cssText = 'position:fixed;bottom:20px;left:16px;right:16px;z-index:999999;padding:14px 16px;background:rgba(0,0,0,0.75);color:#fff;border-radius:12px;text-align:center;font-size:13px;pointer-events:none;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,0.1);';
+  info.innerHTML = '📷 Arahkan kamera ke <strong>marker Hiro</strong>';
   document.body.appendChild(info);
 
   // Marker events
@@ -124,13 +131,13 @@ export function startARScene(container, markerContent, options = {}) {
     const m = document.getElementById('pintar-ar-marker');
     if (m) {
       m.addEventListener('markerFound', () => {
-        info.textContent = 'Marker terdeteksi!';
+        info.innerHTML = '✅ <strong>Marker terdeteksi!</strong> Objek 3D tampil di atas marker.';
         info.style.background = 'rgba(0,128,0,0.8)';
         if (options.onMarkerFound) options.onMarkerFound();
       });
       m.addEventListener('markerLost', () => {
-        info.textContent = 'Arahkan kamera ke marker Hiro...';
-        info.style.background = 'rgba(0,0,0,0.7)';
+        info.innerHTML = '📷 Arahkan kamera ke <strong>marker Hiro</strong>';
+        info.style.background = 'rgba(0,0,0,0.75)';
         if (options.onMarkerLost) options.onMarkerLost();
       });
     }
@@ -148,7 +155,19 @@ export function destroyARScene() {
   document.querySelectorAll('body > video').forEach(v => { try { if (v.srcObject) v.srcObject.getTracks().forEach(t => t.stop()); v.pause(); } catch(e){} v.remove(); });
   const btn = document.getElementById('pintar-ar-close'); if (btn) btn.remove();
   const info = document.getElementById('pintar-ar-info'); if (info) info.remove();
+  
+  // Restore body scroll
   document.body.classList.remove('ar-active');
+  document.body.style.overflow = '';
+  document.body.style.position = '';
+  document.body.style.width = '';
+  document.body.style.top = '';
+  
+  // Restore scroll position
+  if (window._pintarScrollY !== undefined) {
+    window.scrollTo(0, window._pintarScrollY);
+    window._pintarScrollY = undefined;
+  }
 }
 
 export class SimCanvas {
