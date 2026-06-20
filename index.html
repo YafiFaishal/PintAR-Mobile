@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <meta name="description" content="PintAR — Laboratorium Sains Virtual untuk siswa SMP/SMA. Praktikum fisika & kimia dengan AR langsung dari HP.">
+  <meta name="theme-color" content="#0066FF">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔬</text></svg>">
+  <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
+  <title>PintAR — Lab Sains Virtual</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="container">
+      <a href="/" class="navbar-brand">
+        <span class="brand-icon">🔬</span>
+        <span>Pint<strong style="color:var(--brand-primary)">AR</strong></span>
+      </a>
+      <div class="navbar-actions">
+        <button class="btn btn-icon btn-secondary" id="btn-theme" aria-label="Ganti tema">🌙</button>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <!-- Hero -->
+    <section class="hero">
+      <div class="container">
+        <h1>Lab Sains <span class="brand-highlight">Virtual</span><br>di Genggamanmu</h1>
+        <p>Praktikum fisika & kimia pakai HP. Tanpa install, tanpa lab fisik. Langsung buka & eksperimen!</p>
+        <a href="#experiments" class="btn btn-primary btn-lg btn-block">🧪 Mulai Eksperimen</a>
+      </div>
+    </section>
+
+
+    <!-- Experiments Grid -->
+    <section id="experiments" style="padding: var(--space-6) 0;">
+      <div class="container">
+        <h2 class="section-title">🧪 Pilih Eksperimen</h2>
+
+        <div class="exp-grid">
+          <!-- Pendulum -->
+          <div class="card exp-card" onclick="goTo('experiments/pendulum.html')">
+            <div class="card-icon physics">⚖️</div>
+            <div class="card-body">
+              <h3>Bandul (Pendulum)</h3>
+              <p>Pelajari gerak harmonik. Ukur periode bandul dengan mengubah panjang tali & gravitasi.</p>
+              <div class="card-tags">
+                <span class="tag">Fisika</span>
+                <span class="tag">Kelas 10</span>
+                <span class="tag">Giroskop</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Free Fall -->
+          <div class="card exp-card" onclick="goTo('experiments/freefall.html')">
+            <div class="card-icon physics">🍎</div>
+            <div class="card-body">
+              <h3>Gerak Jatuh Bebas</h3>
+              <p>Simulasi gravitasi. Jatuhkan benda dari ketinggian dan ukur waktu tempuh.</p>
+              <div class="card-tags">
+                <span class="tag">Fisika</span>
+                <span class="tag">Kelas 10</span>
+                <span class="tag">Akselerometer</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Chemistry -->
+          <div class="card exp-card" onclick="goTo('experiments/chemistry.html')">
+            <div class="card-icon chemistry">⚗️</div>
+            <div class="card-body">
+              <h3>Reaksi Kimia</h3>
+              <p>Campurkan bahan kimia virtual. Amati perubahan warna, pH, dan suhu reaksi.</p>
+              <div class="card-tags">
+                <span class="tag">Kimia</span>
+                <span class="tag">Kelas 10-11</span>
+                <span class="tag">Shake</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- Sensor Status -->
+    <section style="padding: var(--space-6) 0;">
+      <div class="container">
+        <h2 class="section-title">📱 Sensor HP Kamu</h2>
+        <div class="sensor-grid">
+          <div class="sensor-item" id="sensor-accel">
+            <span class="sensor-icon">📱</span>
+            <div>
+              <div class="sensor-name">Akselerometer</div>
+              <div class="sensor-status">
+                <span class="status-dot"></span>
+                <span class="status-text">Cek...</span>
+              </div>
+            </div>
+          </div>
+          <div class="sensor-item" id="sensor-gyro">
+            <span class="sensor-icon">🔄</span>
+            <div>
+              <div class="sensor-name">Giroskop</div>
+              <div class="sensor-status">
+                <span class="status-dot"></span>
+                <span class="status-text">Cek...</span>
+              </div>
+            </div>
+          </div>
+          <div class="sensor-item" id="sensor-camera">
+            <span class="sensor-icon">📷</span>
+            <div>
+              <div class="sensor-name">Kamera (AR)</div>
+              <div class="sensor-status">
+                <span class="status-dot"></span>
+                <span class="status-text">Cek...</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- How to Use -->
+    <section style="padding: var(--space-6) 0 var(--space-10);">
+      <div class="container">
+        <h2 class="section-title">📖 Cara Pakai</h2>
+        <div class="card" style="padding:var(--space-4)">
+          <ol style="list-style:decimal;padding-left:var(--space-5);display:flex;flex-direction:column;gap:var(--space-3);font-size:var(--fs-sm);color:var(--text-secondary);">
+            <li><strong>Pilih Eksperimen</strong> dari daftar di atas</li>
+            <li><strong>Pilih Mode:</strong> AR (pakai kamera + marker) atau Simulasi (tanpa kamera)</li>
+            <li><strong>Atur Parameter</strong> sesuai instruksi (panjang tali, ketinggian, dll)</li>
+            <li><strong>Jalankan</strong> dan amati hasilnya di layar</li>
+            <li><strong>Isi LKS Digital</strong> (klik 📋) untuk catat hasil & kirim ke guru</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer style="padding:var(--space-6) 0;border-top:1px solid var(--border-light);text-align:center;">
+    <div class="container">
+      <p style="font-size:var(--fs-xs);color:var(--text-muted)">
+        PintAR — Laboratorium Sains Virtual<br>
+        Dibuat untuk siswa SMP/SMA Indonesia 🇮🇩
+      </p>
+    </div>
+  </footer>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
