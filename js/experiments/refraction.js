@@ -316,7 +316,26 @@ modeBtns.forEach((btn) => {
       arView.innerHTML = '<p style="padding:var(--space-6);text-align:center;color:var(--text-secondary)">Memuat AR...</p>';
       const loaded = await loadAR();
       if (loaded) {
-        startARScene(arView, `<a-entity rotation="-90 0 0" scale="0.5 0.5 0.5"><a-plane width="3" height="3" color="#87CEEB" material="transparent:true;opacity:0.3" position="0 0 0.01"></a-plane><a-plane width="3" height="3" color="#004080" material="transparent:true;opacity:0.3" position="0 0 -0.01"></a-plane></a-entity>`, {
+        startARScene(arView, `
+          <a-entity rotation="-90 0 0" scale="0.5 0.5 0.5">
+            <!-- Medium 1 (atas - udara) -->
+            <a-plane width="3" height="1.5" position="0 0.75 0" color="#87CEEB" material="transparent:true;opacity:0.2;side:double"></a-plane>
+            <a-text value="n1=${n1.toFixed(2)}" position="-1.2 1.2 0.1" color="#fff" width="3"></a-text>
+            <!-- Medium 2 (bawah - air/kaca) -->
+            <a-plane width="3" height="1.5" position="0 -0.75 0" color="#004080" material="transparent:true;opacity:0.35;side:double"></a-plane>
+            <a-text value="n2=${n2.toFixed(2)}" position="-1.2 -0.5 0.1" color="#fff" width="3"></a-text>
+            <!-- Garis batas -->
+            <a-box width="3" height="0.02" depth="0.02" position="0 0 0" color="#fff"></a-box>
+            <!-- Sinar datang (kuning) -->
+            <a-cylinder position="-0.4 0.6 0" rotation="0 0 ${30}" radius="0.02" height="1.2" color="#FFD600" material="emissive:#FFD600;emissiveIntensity:0.5"></a-cylinder>
+            <!-- Sinar bias (orange) -->
+            <a-cylinder position="0.3 -0.5 0" rotation="0 0 ${-22}" radius="0.02" height="1" color="#FF6D00" material="emissive:#FF6D00;emissiveIntensity:0.5"></a-cylinder>
+            <!-- Normal (putih dash) -->
+            <a-cylinder position="0 0 0" radius="0.008" height="2.5" color="#fff" material="opacity:0.5"></a-cylinder>
+            <!-- Label -->
+            <a-text value="Hukum Snell: n1.sin(θ1) = n2.sin(θ2)" position="0 -1.6 0.1" align="center" color="#fff" width="3.5"></a-text>
+          </a-entity>
+        `, {
           onMarkerFound: () => window.showToast('Marker terdeteksi! 🎉', 'success', 2000),
           onMarkerLost: () => {},
           onClose: switchToSim,

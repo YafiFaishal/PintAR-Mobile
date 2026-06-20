@@ -406,7 +406,32 @@ modeBtns.forEach((btn) => {
       arView.innerHTML = '<p style="padding:var(--space-6);text-align:center;color:var(--text-secondary)">Memuat AR...</p>';
       const loaded = await loadAR();
       if (loaded) {
-        startARScene(arView, `<a-entity rotation="-90 0 0" scale="0.5 0.5 0.5"><a-box position="-0.5 0 0" width="0.3" height="0.1" depth="0.2" color="#64748b"></a-box><a-box position="0 0 0" width="0.3" height="0.1" depth="0.2" color="#64748b"></a-box><a-box position="0.5 0 0" width="0.3" height="0.1" depth="0.2" color="#64748b"></a-box><a-sphere position="0 0.5 0" radius="0.15" color="#FFD600" material="emissive:#FFD600;emissiveIntensity:${Math.min(1, Itotal*10).toFixed(2)}"></a-sphere></a-entity>`, {
+        startARScene(arView, `
+          <a-entity rotation="-90 0 0" scale="0.4 0.4 0.4">
+            <!-- Base plate -->
+            <a-plane width="4" height="3" color="#1e293b" material="opacity:0.9"></a-plane>
+            <!-- Battery -->
+            <a-box position="-1.5 0 0.1" width="0.4" height="0.7" depth="0.2" color="#334155"></a-box>
+            <a-box position="-1.5 0.2 0.2" width="0.15" height="0.1" depth="0.1" color="#ef4444"></a-box>
+            <a-text value="+" position="-1.5 0.35 0.2" align="center" color="#ef4444" width="2"></a-text>
+            <a-text value="${V}V" position="-1.5 -0.5 0.2" align="center" color="#fff" width="2"></a-text>
+            <!-- Resistors -->
+            <a-box position="-0.3 0 0.1" width="0.5" height="0.2" depth="0.15" color="#64748b"></a-box>
+            <a-text value="R1=${R1}Ω" position="-0.3 -0.3 0.2" align="center" color="#60a5fa" width="2.5"></a-text>
+            <a-box position="0.5 0 0.1" width="0.5" height="0.2" depth="0.15" color="#64748b"></a-box>
+            <a-text value="R2=${R2}Ω" position="0.5 -0.3 0.2" align="center" color="#60a5fa" width="2.5"></a-text>
+            <a-box position="1.3 0 0.1" width="0.5" height="0.2" depth="0.15" color="#64748b"></a-box>
+            <a-text value="R3=${R3}Ω" position="1.3 -0.3 0.2" align="center" color="#60a5fa" width="2.5"></a-text>
+            <!-- Lamp -->
+            <a-sphere position="1.3 0.8 0.2" radius="0.15" color="#FFD600" material="emissive:#FFD600;emissiveIntensity:${Math.min(1, Itotal*10).toFixed(2)}"></a-sphere>
+            <!-- Wires -->
+            <a-cylinder position="-0.9 0 0.05" rotation="0 0 90" radius="0.02" height="0.8" color="#22c55e"></a-cylinder>
+            <a-cylinder position="0.1 0 0.05" rotation="0 0 90" radius="0.02" height="0.3" color="#22c55e"></a-cylinder>
+            <a-cylinder position="0.9 0 0.05" rotation="0 0 90" radius="0.02" height="0.3" color="#22c55e"></a-cylinder>
+            <!-- Info -->
+            <a-text value="V=IR | I=${(Itotal*1000).toFixed(1)}mA" position="0 1.2 0.2" align="center" color="#fff" width="4"></a-text>
+          </a-entity>
+        `, {
           onMarkerFound: () => window.showToast('Marker terdeteksi! 🎉', 'success', 2000),
           onMarkerLost: () => {},
           onClose: switchToSim,

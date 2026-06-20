@@ -314,7 +314,28 @@ modeBtns.forEach((btn) => {
       arView.innerHTML = '<p style="padding:var(--space-6);text-align:center;color:var(--text-secondary)">Memuat AR...</p>';
       const loaded = await loadAR();
       if (loaded) {
-        startARScene(arView, `<a-entity rotation="-60 0 0" scale="0.4 0.4 0.4"><a-box position="0 0 0" width="2" height="1.5" depth="2" color="#a5f3fc" material="transparent:true;opacity:0.25;side:double"></a-box><a-box position="0 -0.2 0" width="1.8" height="1" depth="1.8" color="#0077be" material="transparent:true;opacity:0.4"></a-box><a-box id="ar-obj" position="0 0.2 0" width="0.5" height="0.5" depth="0.5" color="${obj.color}"></a-box></a-entity>`, {
+        startARScene(arView, `
+          <a-entity rotation="-60 0 0" scale="0.4 0.4 0.4">
+            <!-- Bak air (transparan) -->
+            <a-box position="0 0.5 0" width="2" height="1.8" depth="2" color="#a5f3fc" material="transparent:true;opacity:0.2;side:double"></a-box>
+            <!-- Air dalam bak -->
+            <a-box position="0 0.2 0" width="1.9" height="1.2" depth="1.9" color="#0077be" material="transparent:true;opacity:0.35"></a-box>
+            <!-- Permukaan air (gelombang) -->
+            <a-plane position="0 0.8 0" rotation="-90 0 0" width="1.9" height="1.9" color="#00bcd4" material="transparent:true;opacity:0.3"></a-plane>
+            <!-- Objek (posisi tergantung status) -->
+            <a-box position="0 ${status === 'Terapung' ? '0.7' : status === 'Melayang' ? '0.4' : '0.1'} 0" width="0.5" height="0.5" depth="0.5" color="${obj.color}" material="metalness:0.3;roughness:0.7"></a-box>
+            <!-- Panah gaya berat (merah, ke bawah) -->
+            <a-cylinder position="0.8 0.4 0" radius="0.03" height="0.6" color="#ef4444"></a-cylinder>
+            <a-cone position="0.8 0.05 0" radius-bottom="0.08" height="0.15" color="#ef4444"></a-cone>
+            <a-text value="W" position="1 0.4 0" color="#ef4444" width="2"></a-text>
+            <!-- Panah gaya apung (biru, ke atas) -->
+            <a-cylinder position="-0.8 0.4 0" radius="0.03" height="0.5" color="#3b82f6"></a-cylinder>
+            <a-cone position="-0.8 0.7 0" radius-bottom="0.08" height="0.15" color="#3b82f6" rotation="180 0 0"></a-cone>
+            <a-text value="Fa" position="-1 0.4 0" color="#3b82f6" width="2"></a-text>
+            <!-- Info -->
+            <a-text value="${status} | Fa=${buoyancy.toFixed(1)}N" position="0 -0.5 0" align="center" color="#fff" width="3"></a-text>
+          </a-entity>
+        `, {
           onMarkerFound: () => window.showToast('Marker terdeteksi! 🎉', 'success', 2000),
           onMarkerLost: () => {},
           onClose: switchToSim,
