@@ -84,6 +84,11 @@
     --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
     --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
     --shadow-lg: 0 8px 24px rgba(0,0,0,0.5);
+    color-scheme: dark;
+  }
+  body {
+    background-color: #0f172a;
+    color: #f1f5f9;
   }
 }
 
@@ -101,6 +106,60 @@
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
   --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
   --shadow-lg: 0 8px 24px rgba(0,0,0,0.5);
+  color-scheme: dark;
+}
+
+/* Force body and all backgrounds in dark mode */
+[data-theme="dark"] body,
+[data-theme="dark"] {
+  background-color: #0f172a !important;
+  color: #f1f5f9;
+}
+
+[data-theme="dark"] .card,
+[data-theme="dark"] .exp-card {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+[data-theme="dark"] .hero,
+[data-theme="dark"] main,
+[data-theme="dark"] section,
+[data-theme="dark"] footer {
+  background-color: transparent;
+}
+
+[data-theme="dark"] .section-title,
+[data-theme="dark"] .hero h1,
+[data-theme="dark"] h1, [data-theme="dark"] h2,
+[data-theme="dark"] h3, [data-theme="dark"] h4 {
+  color: #f1f5f9;
+}
+
+[data-theme="dark"] .hero p,
+[data-theme="dark"] .exp-card .card-body p {
+  color: #cbd5e0;
+}
+
+[data-theme="dark"] .exp-card .card-body h3 {
+  color: #f1f5f9;
+}
+
+[data-theme="dark"] a {
+  color: #60a5fa;
+}
+
+[data-theme="dark"] .navbar-brand {
+  color: #f1f5f9;
+}
+
+[data-theme="dark"] .tutorial-card {
+  background: #1e293b;
+  color: #f1f5f9;
+}
+
+[data-theme="dark"] .tutorial-card p {
+  color: #cbd5e0;
 }
 
 /* Dark mode overrides for specific elements */
@@ -198,6 +257,76 @@
 [data-theme="dark"] .install-banner {
   background: #1e293b;
   border-color: #334155;
+}
+
+/* Dark mode: ensure ALL remaining elements */
+[data-theme="dark"] .bottom-sheet-header {
+  border-color: #334155;
+}
+
+[data-theme="dark"] .bottom-sheet-header h3 {
+  color: #f1f5f9;
+}
+
+[data-theme="dark"] .slider-row .slider-label {
+  color: #cbd5e0;
+}
+
+[data-theme="dark"] .form-label {
+  color: #94a3b8;
+}
+
+[data-theme="dark"] .lks-panel-header {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+[data-theme="dark"] .lks-panel-header h3 {
+  color: #f1f5f9;
+}
+
+[data-theme="dark"] .lks-panel-footer {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+[data-theme="dark"] .lks-section-title {
+  color: #60a5fa;
+}
+
+[data-theme="dark"] .marker-overlay .instruction-box {
+  background: #1e293b;
+  color: #f1f5f9;
+}
+
+[data-theme="dark"] .data-chip .data-label {
+  color: #94a3b8;
+}
+
+[data-theme="dark"] .data-chip .data-unit {
+  color: #94a3b8;
+}
+
+[data-theme="dark"] .btn-icon.btn-secondary {
+  background: #334155;
+  color: #f1f5f9;
+  border-color: #475569;
+}
+
+/* Dark mode for inline-styled cards in experiments */
+[data-theme="dark"] .card p,
+[data-theme="dark"] .bottom-sheet-body p {
+  color: #cbd5e0;
+}
+
+[data-theme="dark"] .bottom-sheet-body .card {
+  background: #0f172a;
+  border-color: #334155;
+}
+
+[data-theme="dark"] select option {
+  background: #1e293b;
+  color: #f1f5f9;
 }
 
 

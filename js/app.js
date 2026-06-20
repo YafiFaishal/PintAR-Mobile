@@ -27,28 +27,45 @@ window.showToast = function (message, type = 'info', duration = 3000) {
 // ─── Theme Toggle ───
 function initTheme() {
   const saved = localStorage.getItem('pintar_theme');
-  if (saved) document.documentElement.setAttribute('data-theme', saved);
+  
+  // Determine initial theme
+  let currentTheme;
+  if (saved) {
+    currentTheme = saved;
+  } else {
+    // Auto-detect system preference
+    currentTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+  
+  // Apply theme
+  if (currentTheme === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+  }
 
   const btn = document.getElementById('btn-theme');
   if (btn) {
     btn.addEventListener('click', () => {
-      const current = document.documentElement.getAttribute('data-theme');
-      const next = current === 'dark' ? 'light' : 'dark';
-      if (next === 'light') {
-        document.documentElement.removeAttribute('data-theme');
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      const next = isDark ? 'light' : 'dark';
+      
+      if (next === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
       } else {
-        document.documentElement.setAttribute('data-theme', next);
+        document.documentElement.removeAttribute('data-theme');
       }
+      
       localStorage.setItem('pintar_theme', next);
       btn.textContent = next === 'dark' ? '☀️' : '🌙';
+      
       // Update meta theme-color
       const meta = document.querySelector('meta[name="theme-color"]');
       if (meta) meta.content = next === 'dark' ? '#1e293b' : '#0066FF';
     });
 
     // Set initial icon
-    const theme = document.documentElement.getAttribute('data-theme') || 'light';
-    btn.textContent = theme === 'dark' ? '☀️' : '🌙';
+    btn.textContent = currentTheme === 'dark' ? '☀️' : '🌙';
   }
 }
 
