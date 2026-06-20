@@ -781,16 +781,28 @@ ul, ol { list-style: none; }
 }
 
 /* ── Suppress A-Frame's device orientation permission dialog ──
-   We handle this permission ourselves before starting the scene */
+   We handle this permission ourselves before starting the scene.
+   A-Frame creates a modal with class .a-orientation-modal or inline styles.
+   This catches ALL variations. */
 .a-orientation-modal,
+.a-modal,
 [data-a-orientation-modal],
 .a-dialog-allow-button,
 .a-dialog-deny-button,
 .a-dialog-ok-button,
-.a-modal {
+div[style*="This immersive website"],
+a-scene .a-loader-title,
+a-scene .a-enter-vr {
   display: none !important;
   visibility: hidden !important;
   pointer-events: none !important;
+  opacity: 0 !important;
+  width: 0 !important;
+  height: 0 !important;
+  position: absolute !important;
+  top: -9999px !important;
+  left: -9999px !important;
+  overflow: hidden !important;
 }
 
 /* ── AR Close button — always on top of everything ── */
@@ -803,6 +815,7 @@ ul, ol { list-style: none; }
   display: block !important;
   opacity: 1 !important;
   visibility: visible !important;
+  touch-action: manipulation !important;
 }
 
 /* ── AR overlay injected to body by ar-loader.js ──

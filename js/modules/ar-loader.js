@@ -119,24 +119,35 @@ function detectBrowser() {
 
 // ─── Public: Request camera permission explicitly ────────────────
 export async function requestCameraPermission() {
-  // On iOS 13+, also request motion sensor permission
-  // This prevents A-Frame from showing its own blocking dialog
+  // On iOS 13+, request motion sensor permissions FIRST
+  // These MUST complete before we start the AR scene, otherwise
+  // A-Frame will show its own blocking modal dialog
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-  if (isIOS && typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
-    try {
-      const motionPerm = await DeviceMotionEvent.requestPermission();
-      console.log('[PintAR] iOS motion sensor permission:', motionPerm);
-    } catch (e) {
-      console.warn('[PintAR] iOS motion permission request failed (non-blocking):', e);
+  
+  if (isIOS) {
+    // Request DeviceMotion permission
+    if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+      try {
+        const motionPerm = await DeviceMotionEvent.requestPermission();
+        console.log('[PintAR] iOS DeviceMotion permission:', motionPerm);
+      } catch (e) {
+        console.warn('[PintAR] iOS DeviceMotion permission failed:', e.message);
+        // Don't fail — motion is optional for AR, camera is what matters
+      }
     }
-  }
-  if (isIOS && typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-    try {
-      const orientPerm = await DeviceOrientationEvent.requestPermission();
-      console.log('[PintAR] iOS orientation permission:', orientPerm);
-    } catch (e) {
-      console.warn('[PintAR] iOS orientation permission request failed (non-blocking):', e);
+    
+    // Request DeviceOrientation permission
+    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+      try {
+        const orientPerm = await DeviceOrientationEvent.requestPermission();
+        console.log('[PintAR] iOS DeviceOrientation permission:', orientPerm);
+      } catch (e) {
+        console.warn('[PintAR] iOS DeviceOrientation permission failed:', e.message);
+      }
     }
+
+    // Small delay to let iOS settle after permission dialogs
+    await new Promise(r => setTimeout(r, 300));
   }
 
   // Now request camera
@@ -182,6 +193,33 @@ export async function loadAR() {
 
       // Small delay to ensure A-Frame is fully initialized
       await new Promise(r => setTimeout(r, 300));
+
+      // Patch A-Frame to disable its device orientation permission UI
+      // This MUST happen after A-Frame loads but BEFORE AR.js
+      if (typeof AFRAME !== 'undefined') {
+        // Tell A-Frame that device orientation permission is already granted
+        if (AFRAME.utils && AFRAME.utils.device) {
+          AFRAME.utils.device.checkHeadsetConnected = () => false;
+        }
+        // Override the permission UI component if it exists
+        if (AFRAME.components && AFRAME.components['device-orientation-permission-ui']) {
+          AFRAME.components['device-orientation-permission-ui'].Component = {
+            init: function() {},
+            remove: function() {}
+          };
+        }
+        // Patch at the schema level — prevent the component from ever running
+        try {
+          AFRAME.registerComponent('device-orientation-permission-ui', {
+            schema: { enabled: { default: false } },
+            init: function() { /* no-op */ },
+            remove: function() { /* no-op */ }
+          }, true); // force re-register
+        } catch(e) {
+          // Component might already be registered, that's fine
+          console.log('[PintAR] Could not override permission-ui component (may already exist)');
+        }
+      }
 
       // Then load AR.js
       await loadWithFallback(CDN_SOURCES.arjs, 'AR.js');
@@ -297,16 +335,6 @@ export function startARScene(container, markerContent, options = {}) {
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
   const isAndroid = /Android/i.test(navigator.userAgent);
 
-  // ── Request iOS motion sensor permission BEFORE creating scene ──
-  // This prevents A-Frame's own dialog from appearing and blocking the UI
-  if (isIOS && typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
-    DeviceMotionEvent.requestPermission().then(state => {
-      console.log('[PintAR] iOS motion permission:', state);
-    }).catch(e => {
-      console.warn('[PintAR] iOS motion permission error (non-blocking):', e);
-    });
-  }
-
   // ── Fullscreen overlay ──
   const root = document.createElement('div');
   root.id = 'ar-root';
@@ -382,6 +410,22 @@ export function startARScene(container, markerContent, options = {}) {
   closeBtn.addEventListener('click', handleClose, { capture: true });
   closeBtn.addEventListener('touchend', handleClose, { capture: true, passive: false });
 
+  // ALSO add a document-level capture listener that checks if tap was in close button area
+  // This works even if A-Frame's modal is intercepting events
+  function globalTouchHandler(e) {
+    const btn = document.getElementById('ar-close-btn');
+    if (!btn) { document.removeEventListener('touchstart', globalTouchHandler, true); return; }
+    const rect = btn.getBoundingClientRect();
+    const touch = e.touches ? e.touches[0] : e;
+    if (touch && touch.clientX >= rect.left && touch.clientX <= rect.right &&
+        touch.clientY >= rect.top && touch.clientY <= rect.bottom) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      handleClose(e);
+    }
+  }
+  document.addEventListener('touchstart', globalTouchHandler, { capture: true, passive: false });
+
   // Append close button directly to body (NOT inside ar-root)
   // This ensures it's never blocked by A-Frame's scene elements
   document.body.appendChild(closeBtn);
@@ -404,6 +448,25 @@ export function startARScene(container, markerContent, options = {}) {
 
   // ── Start video watcher ──
   startVideoWatcher();
+
+  // ── Kill any A-Frame modal/dialog that appears ──
+  // A-Frame and AR.js may still create permission dialogs despite our patches
+  const modalKiller = setInterval(() => {
+    // Kill A-Frame orientation modal
+    document.querySelectorAll('.a-orientation-modal, .a-modal, [data-a-modal]').forEach(el => {
+      el.style.display = 'none';
+      el.style.pointerEvents = 'none';
+      el.remove();
+    });
+    // Also kill any overlay/backdrop that blocks interaction
+    document.querySelectorAll('.a-dialog-allow-button, .a-dialog-deny-button, .a-dialog-ok-button').forEach(btn => {
+      // Auto-click "allow" if present
+      try { btn.click(); } catch(e) {}
+    });
+  }, 200);
+
+  // Stop modal killer after 10 seconds (dialog should be gone by then)
+  setTimeout(() => clearInterval(modalKiller), 10000);
 
   // ── Post-init: fix video, attach marker events ──
   const initTimeout = setTimeout(() => {
@@ -462,6 +525,9 @@ export function destroyARScene() {
   const closeBtn = document.getElementById('ar-close-btn');
   if (closeBtn) closeBtn.remove();
 
+  // Remove all document-level capture listeners we added
+  // (They self-cleanup when they can't find the button)
+
   // Remove AR overlay
   const existing = document.getElementById('ar-root');
   if (existing) existing.remove();
@@ -473,6 +539,8 @@ export function destroyARScene() {
         scene.renderer.forceContextLoss();
         scene.renderer.dispose();
       }
+      // Exit AR/VR mode if active
+      if (scene.exitVR) scene.exitVR();
     } catch(e) {}
     scene.remove();
   });
@@ -488,6 +556,9 @@ export function destroyARScene() {
   document.querySelectorAll('body > canvas').forEach(el => {
     if (el.classList.contains('a-canvas') || !el.id) el.remove();
   });
+
+  // Remove any A-Frame modals/dialogs that might still be around
+  document.querySelectorAll('.a-orientation-modal, .a-modal, .a-loader-title').forEach(el => el.remove());
 
   arRootEl = null;
   console.log('[PintAR] AR scene destroyed');
