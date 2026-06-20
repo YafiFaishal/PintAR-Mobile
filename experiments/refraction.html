@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <meta name="theme-color" content="#0066FF">
+  <title>Pembiasan Cahaya | PintAR</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="manifest" href="../manifest.json">
+</head>
+<body class="exp-page">
+
+  <header class="exp-header">
+    <button class="btn btn-sm btn-secondary" onclick="goTo('../index.html')">← Kembali</button>
+    <h1>Pembiasan Cahaya</h1>
+    <button class="btn btn-icon btn-secondary" id="btn-theme" aria-label="Tema">🌙</button>
+  </header>
+
+  <div style="padding:var(--space-3) var(--space-4);background:var(--bg-secondary);border-bottom:1px solid var(--border-light);">
+    <div class="mode-switcher" id="mode-switcher">
+      <button class="mode-btn active" data-mode="sim">📱 Simulasi</button>
+      <button class="mode-btn" data-mode="ar">📷 Mode AR</button>
+    </div>
+  </div>
+
+  <div class="sim-canvas-container" id="sim-view">
+    <canvas class="sim-canvas" id="refraction-canvas"></canvas>
+  </div>
+  <div class="ar-viewport hidden" id="ar-view"></div>
+
+  <div class="live-data-bar">
+    <div class="data-chip">
+      <div class="data-label">θ₁ (datang)</div>
+      <div class="data-value" id="val-theta1">30.0°</div>
+    </div>
+    <div class="data-chip">
+      <div class="data-label">θ₂ (bias)</div>
+      <div class="data-value" id="val-theta2">19.5°</div>
+    </div>
+    <div class="data-chip">
+      <div class="data-label">n₁</div>
+      <div class="data-value" id="val-n1">1.00</div>
+    </div>
+    <div class="data-chip">
+      <div class="data-label">n₂</div>
+      <div class="data-value" id="val-n2">1.52</div>
+    </div>
+    <div class="data-chip">
+      <div class="data-label">Status</div>
+      <div class="data-value" id="val-status" style="font-size:var(--fs-xs)">Dibiaskan</div>
+    </div>
+  </div>
+
+  <div class="bottom-sheet open" id="controls-sheet">
+    <div class="bottom-sheet-handle"></div>
+    <div class="bottom-sheet-header">
+      <h3>⚙️ Pengaturan</h3>
+      <button class="btn btn-sm btn-secondary" id="btn-toggle-sheet">▼</button>
+    </div>
+    <div class="bottom-sheet-body">
+      <div class="form-group">
+        <div class="slider-row">
+          <span class="slider-label">Sudut Datang (θ₁)</span>
+          <span class="slider-value" id="disp-theta1">30°</span>
+        </div>
+        <input type="range" id="ctrl-theta1" min="0" max="89" step="1" value="30">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Medium 1 (atas)</label>
+        <select class="form-select" id="ctrl-medium1">
+          <option value="1.00">Udara (n = 1.00)</option>
+          <option value="1.33">Air (n = 1.33)</option>
+          <option value="1.52">Kaca (n = 1.52)</option>
+          <option value="2.42">Berlian (n = 2.42)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Medium 2 (bawah)</label>
+        <select class="form-select" id="ctrl-medium2">
+          <option value="1.00">Udara (n = 1.00)</option>
+          <option value="1.33" selected>Air (n = 1.33)</option>
+          <option value="1.52">Kaca (n = 1.52)</option>
+          <option value="2.42">Berlian (n = 2.42)</option>
+        </select>
+      </div>
+
+      <div class="card" style="padding:var(--space-3);margin-top:var(--space-3)">
+        <p style="font-size:var(--fs-xs);color:var(--text-muted);margin-bottom:4px">Hukum Snell:</p>
+        <p style="font-size:var(--fs-sm);font-weight:700;font-family:var(--font-mono);color:var(--brand-primary)" id="disp-formula">n₁ sin(θ₁) = n₂ sin(θ₂)</p>
+        <p style="font-size:var(--fs-xs);color:var(--text-muted);margin-top:6px" id="disp-critical">Sudut kritis: —</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/app.js"></script>
+  <script type="module" src="../js/experiments/refraction.js"></script>
+</body>
+</html>

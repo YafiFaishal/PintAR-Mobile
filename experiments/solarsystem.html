@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <meta name="theme-color" content="#0066FF">
+  <title>Tata Surya | PintAR</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="manifest" href="../manifest.json">
+</head>
+<body class="exp-page">
+
+  <header class="exp-header">
+    <button class="btn btn-sm btn-secondary" onclick="goTo('../index.html')">← Kembali</button>
+    <h1>Tata Surya (Kepler)</h1>
+    <button class="btn btn-icon btn-secondary" id="btn-theme" aria-label="Tema">🌙</button>
+  </header>
+
+  <div style="padding:var(--space-3) var(--space-4);background:var(--bg-secondary);border-bottom:1px solid var(--border-light);">
+    <div class="mode-switcher" id="mode-switcher">
+      <button class="mode-btn active" data-mode="sim">📱 Simulasi</button>
+      <button class="mode-btn" data-mode="ar">📷 Mode AR</button>
+    </div>
+  </div>
+
+  <div class="sim-canvas-container" id="sim-view">
+    <canvas class="sim-canvas" id="solar-canvas"></canvas>
+  </div>
+  <div class="ar-viewport hidden" id="ar-view"></div>
+
+  <div class="live-data-bar">
+    <div class="data-chip">
+      <div class="data-label">Planet</div>
+      <div class="data-value" id="val-planet-name" style="font-size:var(--fs-xs)">Bumi</div>
+    </div>
+    <div class="data-chip">
+      <div class="data-label">a</div>
+      <div class="data-value" id="val-semimajor">1.000</div>
+      <div class="data-unit">AU</div>
+    </div>
+    <div class="data-chip">
+      <div class="data-label">T</div>
+      <div class="data-value" id="val-period">1.000</div>
+      <div class="data-unit">tahun</div>
+    </div>
+    <div class="data-chip">
+      <div class="data-label">T²/a³</div>
+      <div class="data-value" id="val-kepler3">1.000</div>
+    </div>
+  </div>
+
+  <div class="bottom-sheet open" id="controls-sheet">
+    <div class="bottom-sheet-handle"></div>
+    <div class="bottom-sheet-header">
+      <h3>🪐 Pengaturan</h3>
+      <button class="btn btn-sm btn-secondary" id="btn-toggle-sheet">▼</button>
+    </div>
+    <div class="bottom-sheet-body">
+      <div class="form-group">
+        <label class="form-label">Fokus Planet</label>
+        <select class="form-select" id="ctrl-planet">
+          <option value="0">Merkurius</option>
+          <option value="1">Venus</option>
+          <option value="2" selected>Bumi</option>
+          <option value="3">Mars</option>
+          <option value="4">Jupiter</option>
+          <option value="5">Saturnus</option>
+          <option value="6">Uranus</option>
+          <option value="7">Neptunus</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <div class="slider-row">
+          <span class="slider-label">Kecepatan Simulasi</span>
+          <span class="slider-value" id="disp-speed">1.0x</span>
+        </div>
+        <input type="range" id="ctrl-speed" min="0.1" max="10" step="0.1" value="1">
+      </div>
+
+      <div class="card" style="padding:var(--space-3);margin-top:var(--space-3)">
+        <p style="font-size:var(--fs-xs);color:var(--text-muted);margin-bottom:4px">Hukum Kepler III:</p>
+        <p style="font-size:var(--fs-sm);font-weight:700;font-family:var(--font-mono);color:var(--brand-primary)">T² = a³</p>
+        <p style="font-size:var(--fs-xs);color:var(--text-secondary);margin-top:4px">T = periode (tahun), a = semi-major axis (AU)</p>
+        <div id="disp-kepler-table" style="margin-top:var(--space-3);max-height:150px;overflow-y:auto;"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/app.js"></script>
+  <script type="module" src="../js/experiments/solarsystem.js"></script>
+</body>
+</html>

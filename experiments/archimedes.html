@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <meta name="theme-color" content="#0066FF">
+  <title>Hukum Archimedes | PintAR</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="manifest" href="../manifest.json">
+</head>
+<body class="exp-page">
+
+  <header class="exp-header">
+    <button class="btn btn-sm btn-secondary" onclick="goTo('../index.html')">← Kembali</button>
+    <h1>Hukum Archimedes</h1>
+    <button class="btn btn-icon btn-secondary" id="btn-theme" aria-label="Tema">🌙</button>
+  </header>
+
+  <div style="padding:var(--space-3) var(--space-4);background:var(--bg-secondary);border-bottom:1px solid var(--border-light);">
+    <div class="mode-switcher" id="mode-switcher">
+      <button class="mode-btn active" data-mode="sim">📱 Simulasi</button>
+      <button class="mode-btn" data-mode="ar">📷 Mode AR</button>
+    </div>
+  </div>
+
+  <div class="sim-canvas-container" id="sim-view">
+    <canvas class="sim-canvas" id="archimedes-canvas"></canvas>
+  </div>
+  <div class="ar-viewport hidden" id="ar-view"></div>
+
+  <div class="live-data-bar">
+    <div class="data-chip">
+      <div class="data-label">Berat (W)</div>
+      <div class="data-value" id="val-weight">0.00</div>
+      <div class="data-unit">N</div>
+    </div>
+    <div class="data-chip">
+      <div class="data-label">Gaya Apung (Fa)</div>
+      <div class="data-value" id="val-buoyancy">0.00</div>
+      <div class="data-unit">N</div>
+    </div>
+    <div class="data-chip">
+      <div class="data-label">Berat Semu</div>
+      <div class="data-value" id="val-apparent">0.00</div>
+      <div class="data-unit">N</div>
+    </div>
+    <div class="data-chip">
+      <div class="data-label">Status</div>
+      <div class="data-value" id="val-status" style="font-size:var(--fs-xs)">—</div>
+    </div>
+  </div>
+
+  <div class="bottom-sheet open" id="controls-sheet">
+    <div class="bottom-sheet-handle"></div>
+    <div class="bottom-sheet-header">
+      <h3>⚙️ Pengaturan</h3>
+      <button class="btn btn-sm btn-secondary" id="btn-toggle-sheet">▼</button>
+    </div>
+    <div class="bottom-sheet-body">
+      <div class="form-group">
+        <label class="form-label">Objek</label>
+        <select class="form-select" id="ctrl-object">
+          <option value="iron">Besi (ρ = 7874 kg/m³)</option>
+          <option value="wood">Kayu (ρ = 600 kg/m³)</option>
+          <option value="ice">Es Batu (ρ = 917 kg/m³)</option>
+          <option value="aluminum">Aluminium (ρ = 2700 kg/m³)</option>
+          <option value="cork">Gabus (ρ = 120 kg/m³)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Cairan</label>
+        <select class="form-select" id="ctrl-fluid">
+          <option value="water">Air (ρ = 1000 kg/m³)</option>
+          <option value="saltwater">Air Laut (ρ = 1025 kg/m³)</option>
+          <option value="oil">Minyak (ρ = 800 kg/m³)</option>
+          <option value="mercury">Raksa (ρ = 13546 kg/m³)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <div class="slider-row">
+          <span class="slider-label">Volume Objek (V)</span>
+          <span class="slider-value" id="disp-volume">0.001 m³</span>
+        </div>
+        <input type="range" id="ctrl-volume" min="0.0001" max="0.005" step="0.0001" value="0.001">
+      </div>
+
+      <div class="form-group">
+        <div class="slider-row">
+          <span class="slider-label">Kedalaman Celup</span>
+          <span class="slider-value" id="disp-depth">100%</span>
+        </div>
+        <input type="range" id="ctrl-depth" min="0" max="100" step="1" value="100">
+      </div>
+
+      <div class="card" style="padding:var(--space-3);margin-top:var(--space-3)">
+        <p style="font-size:var(--fs-xs);color:var(--text-muted);margin-bottom:4px">Rumus:</p>
+        <p style="font-size:var(--fs-sm);font-weight:700;font-family:var(--font-mono);color:var(--brand-primary)">Fa = ρ_fluida × V_tercelup × g</p>
+        <p style="font-size:var(--fs-xs);color:var(--text-muted);margin-top:4px">Benda terapung jika ρ_benda &lt; ρ_fluida</p>
+        <p style="font-size:var(--fs-xs);color:var(--text-secondary);margin-top:4px" id="disp-calc"></p>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/app.js"></script>
+  <script type="module" src="../js/experiments/archimedes.js"></script>
+</body>
+</html>
