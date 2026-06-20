@@ -1,41 +1,40 @@
 /**
- * PintAR Mobile — AR Loader
- * Lazy-loads A-Frame + AR.js only when needed.
- * Manages AR scene lifecycle, scan overlay, and marker detection.
+ * PintAR Mobile — AR Loader  (v3 — MutationObserver video fix)
  *
- * Mobile fix: a-scene is appended directly to body WITHOUT "embedded"
- * so A-Frame renders truly fullscreen on iOS Safari without offset.
+ * Root cause of camera shift on iOS/Android:
+ *   AR.js continuously sets inline px-based styles on <video> via JS.
+ *   CSS overrides get beaten by subsequent JS style mutations.
+ *
+ * Fix: MutationObserver intercepts every style mutation on the video
+ *      and re-applies the correct fullscreen styles using setProperty('important').
  */
 
-let arLoaded = false;
+let arLoaded       = false;
 let loadingPromise = null;
-let arRootEl = null; // The fixed fullscreen overlay we inject into body
+let arRootEl       = null;   // fixed overlay appended to body
+let videoObserver  = null;   // MutationObserver that keeps video fullscreen
 
 const AFRAME_URL = 'https://aframe.io/releases/1.6.0/aframe.min.js';
 const ARJS_URL   = 'https://raw.githack.com/AR-js-org/AR.js/3.4.8/aframe/build/aframe-ar.js';
 
+// ─── Script loader ───────────────────────────────────────────────
 function loadScript(url) {
   return new Promise((resolve, reject) => {
-    const existing = document.querySelector(`script[src="${url}"]`);
-    if (existing) { resolve(); return; }
-    const script = document.createElement('script');
-    script.src = url;
-    script.onload = resolve;
-    script.onerror = reject;
-    document.head.appendChild(script);
+    if (document.querySelector(`script[src="${url}"]`)) { resolve(); return; }
+    const s = document.createElement('script');
+    s.src = url; s.onload = resolve; s.onerror = reject;
+    document.head.appendChild(s);
   });
 }
 
-/** Check if device can run AR (has camera API) */
+// ─── Public API ──────────────────────────────────────────────────
 export function canRunAR() {
   return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
 }
 
-/** Lazy-load AR libraries. Returns true if successful. */
 export async function loadAR() {
   if (arLoaded) return true;
   if (loadingPromise) return loadingPromise;
-
   loadingPromise = (async () => {
     try {
       await loadScript(AFRAME_URL);
@@ -43,55 +42,113 @@ export async function loadAR() {
       arLoaded = true;
       return true;
     } catch (e) {
-      console.warn('AR libraries failed to load:', e);
+      console.warn('AR libs failed:', e);
       return false;
     }
   })();
-
   return loadingPromise;
 }
 
-/** Check if AR is loaded */
 export function isARLoaded() { return arLoaded; }
 
+// ─── Force a video/canvas element to be truly fullscreen ─────────
+function forceFullscreen(el) {
+  if (!el) return;
+  const props = [
+    ['position',   'fixed'],
+    ['top',        '0'],
+    ['left',       '0'],
+    ['width',      '100%'],
+    ['height',     '100%'],
+    ['max-width',  '100%'],
+    ['max-height', '100%'],
+    ['object-fit', 'cover'],
+    ['transform',  'none'],
+    ['z-index',    el.tagName === 'VIDEO' ? '99' : '100'],
+  ];
+  props.forEach(([p, v]) => el.style.setProperty(p, v, 'important'));
+}
+
+// ─── Start MutationObserver that fights AR.js style mutations ────
+function startVideoWatcher() {
+  stopVideoWatcher(); // clean previous observer
+
+  videoObserver = new MutationObserver((mutations) => {
+    mutations.forEach(m => {
+      // New video/canvas nodes added anywhere in document
+      m.addedNodes && m.addedNodes.forEach(node => {
+        if (node.tagName === 'VIDEO')  forceFullscreen(node);
+        if (node.tagName === 'CANVAS') forceFullscreen(node);
+      });
+      // Style attribute changed on an existing video/canvas
+      if (m.type === 'attributes' && m.attributeName === 'style') {
+        const t = m.target;
+        if (t.tagName === 'VIDEO' || (t.tagName === 'CANVAS' && t.classList.contains('a-canvas'))) {
+          forceFullscreen(t);
+        }
+      }
+    });
+  });
+
+  videoObserver.observe(document.documentElement, {
+    childList: true,
+    subtree: true,
+    attributes: true,
+    attributeFilter: ['style'],
+  });
+}
+
+function stopVideoWatcher() {
+  if (videoObserver) { videoObserver.disconnect(); videoObserver = null; }
+}
+
+// ─── startARScene ─────────────────────────────────────────────────
 /**
- * Start AR scene. Appends a FIXED FULLSCREEN overlay to document.body
- * (not inside the container div) so A-Frame fills the screen correctly
- * on iOS Safari without camera offset.
+ * Creates a fixed fullscreen AR overlay appended directly to body.
+ * a-scene has NO "embedded" attribute → A-Frame renders fullscreen natively.
+ * MutationObserver keeps the camera video truly full-screen on iOS & Android.
  *
- * The header (z-index 150) and bottom sheet (z-index 200) float on top.
- *
- * @param {HTMLElement} container - Reference div (used for cleanup, not rendering)
- * @param {string} markerContent - A-Frame entities HTML inside <a-marker>
- * @param {object} options - { onMarkerFound, onMarkerLost }
- * @returns {{ destroy() }}
+ * @param {HTMLElement} container - reference div (for lifecycle, not rendering)
+ * @param {string} markerContent  - A-Frame entities HTML inside <a-marker>
+ * @param {object} options        - { onMarkerFound, onMarkerLost }
  */
 export function startARScene(container, markerContent, options = {}) {
   if (!arLoaded) return null;
-
-  // Clean any existing AR scene first
   destroyARScene();
 
-  // ── Create fixed fullscreen overlay appended to body ──
+  // ── Fullscreen overlay appended to body ──
   const root = document.createElement('div');
   root.id = 'ar-root';
-  root.style.cssText = [
-    'position:fixed',
-    'top:0', 'left:0',
-    'width:100%', 'height:100%',
-    'z-index:100',
-    'overflow:hidden',
-    'background:#000',
-  ].join(';');
+  root.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:100;overflow:hidden;background:#000;pointer-events:none;';
   document.body.appendChild(root);
   arRootEl = root;
 
-  // ── Scan overlay (fixed, above a-scene) ──
+  // Re-enable pointer events for the a-scene wrapper (handles touch/tap)
+  const sceneWrap = document.createElement('div');
+  sceneWrap.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:100;pointer-events:auto;';
+  root.appendChild(sceneWrap);
+
+  sceneWrap.innerHTML = `
+    <a-scene
+      arjs="sourceType: webcam; facingMode: environment; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;"
+      renderer="antialias: true; alpha: true; precision: mediump;"
+      vr-mode-ui="enabled: false"
+      loading-screen="enabled: false"
+    >
+      <a-marker preset="hiro" id="ar-hiro-marker">
+        ${markerContent}
+      </a-marker>
+      <a-entity camera></a-entity>
+      <a-light type="ambient"      color="#ffffff" intensity="0.7"></a-light>
+      <a-light type="directional"  color="#ffffff" intensity="0.5" position="1 2 1"></a-light>
+    </a-scene>
+  `;
+
+  // ── Scan overlay on top of a-scene ──
   const scanOverlay = document.createElement('div');
-  scanOverlay.id = 'ar-scan-overlay';
+  scanOverlay.id        = 'ar-scan-overlay';
   scanOverlay.className = 'ar-scan-overlay';
-  // Override position to fixed so it sits above the a-scene canvas
-  scanOverlay.style.cssText = 'position:fixed;inset:0;z-index:102;';
+  scanOverlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:110;pointer-events:none;';
   scanOverlay.innerHTML = `
     <div class="ar-scan-box">
       <div class="ar-scan-corners">
@@ -103,76 +160,60 @@ export function startARScene(container, markerContent, options = {}) {
   `;
   root.appendChild(scanOverlay);
 
-  // ── A-Frame scene — NO "embedded", renders fullscreen natively ──
-  const sceneWrapper = document.createElement('div');
-  sceneWrapper.style.cssText = 'position:fixed;inset:0;z-index:100;';
-  sceneWrapper.innerHTML = `
-    <a-scene
-      arjs="sourceType: webcam; facingMode: environment; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;"
-      renderer="antialias: true; alpha: true; precision: mediump;"
-      vr-mode-ui="enabled: false"
-      loading-screen="enabled: false"
-    >
-      <a-marker preset="hiro" id="ar-hiro-marker">
-        ${markerContent}
-      </a-marker>
-      <a-entity camera></a-entity>
-      <a-light type="ambient" color="#ffffff" intensity="0.7"></a-light>
-      <a-light type="directional" color="#ffffff" intensity="0.5" position="1 2 1"></a-light>
-    </a-scene>
-  `;
-  root.appendChild(sceneWrapper);
+  // ── Start watcher BEFORE a-scene init so we catch the first style mutations ──
+  startVideoWatcher();
 
-  // ── Marker detection events ──
-  // Wait a tick for a-scene to register in DOM
+  // ── Also run immediately after A-Frame loads (belt-and-suspenders) ──
   setTimeout(() => {
+    document.querySelectorAll('video').forEach(forceFullscreen);
+    document.querySelectorAll('canvas.a-canvas, canvas').forEach(c => {
+      if (c.closest('#ar-root') || c.parentElement === document.body) forceFullscreen(c);
+    });
+
+    // Hook marker events
     const marker = document.getElementById('ar-hiro-marker');
     if (marker) {
       marker.addEventListener('markerFound', () => {
         scanOverlay.classList.add('hidden');
-        if (options.onMarkerFound) options.onMarkerFound();
+        options.onMarkerFound && options.onMarkerFound();
       });
       marker.addEventListener('markerLost', () => {
         scanOverlay.classList.remove('hidden');
-        if (options.onMarkerLost) options.onMarkerLost();
+        options.onMarkerLost && options.onMarkerLost();
       });
     }
-  }, 0);
+  }, 500);
 
   return { destroy: () => destroyARScene() };
 }
 
-/** Destroy the active AR scene and release camera */
+// ─── destroyARScene ───────────────────────────────────────────────
 export function destroyARScene() {
+  stopVideoWatcher();
+
   // Stop all camera streams
   document.querySelectorAll('video').forEach(v => {
-    if (v.srcObject) {
-      v.srcObject.getTracks().forEach(t => t.stop());
-      v.srcObject = null;
-    }
+    try { if (v.srcObject) { v.srcObject.getTracks().forEach(t => t.stop()); v.srcObject = null; } } catch(e){}
   });
 
-  // Remove the fullscreen AR root overlay
+  // Remove AR overlay
   const existing = document.getElementById('ar-root');
   if (existing) existing.remove();
 
-  // Also clean up any orphaned a-scene / video AR.js left in body
+  // Clean up any orphaned elements AR.js left in body
   document.querySelectorAll('body > a-scene').forEach(el => el.remove());
-  document.querySelectorAll('body > video').forEach(el => el.remove());
-  document.querySelectorAll('body > canvas:not(#pendulum-canvas):not(#graph-canvas)').forEach(el => el.remove());
+  document.querySelectorAll('body > video').forEach(el => { try { el.srcObject && el.srcObject.getTracks().forEach(t=>t.stop()); } catch(e){} el.remove(); });
 
   arRootEl = null;
 }
 
-/**
- * Simple 2D physics canvas renderer (fallback when AR unavailable)
- */
+// ─── SimCanvas ───────────────────────────────────────────────────
 export class SimCanvas {
   constructor(canvasEl) {
     this.canvas = canvasEl;
-    this.ctx = canvasEl.getContext('2d');
+    this.ctx    = canvasEl.getContext('2d');
     this.running = false;
-    this.drawFn = null;
+    this.drawFn  = null;
     this._resize();
     this._resizeBound = () => this._resize();
     window.addEventListener('resize', this._resizeBound);
@@ -180,10 +221,10 @@ export class SimCanvas {
 
   _resize() {
     const rect = this.canvas.parentElement.getBoundingClientRect();
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    this.canvas.width = rect.width * dpr;
+    const dpr  = Math.min(window.devicePixelRatio || 1, 2);
+    this.canvas.width  = rect.width  * dpr;
     this.canvas.height = rect.height * dpr;
-    this.canvas.style.width = rect.width + 'px';
+    this.canvas.style.width  = rect.width  + 'px';
     this.canvas.style.height = rect.height + 'px';
     this.ctx.setTransform(1, 0, 0, 1, 0, 0);
     this.ctx.scale(dpr, dpr);
@@ -192,25 +233,15 @@ export class SimCanvas {
   }
 
   setDrawFunction(fn) { this.drawFn = fn; }
-
-  start() {
-    this.running = true;
-    this._loop();
-  }
-
-  stop() { this.running = false; }
+  start()  { this.running = true;  this._loop(); }
+  stop()   { this.running = false; }
+  clear()  { this.ctx.clearRect(0, 0, this.w, this.h); }
+  destroy(){ this.running = false; window.removeEventListener('resize', this._resizeBound); }
 
   _loop() {
     if (!this.running) return;
     this.ctx.clearRect(0, 0, this.w, this.h);
     if (this.drawFn) this.drawFn(this.ctx, this.w, this.h);
     requestAnimationFrame(() => this._loop());
-  }
-
-  clear() { this.ctx.clearRect(0, 0, this.w, this.h); }
-
-  destroy() {
-    this.running = false;
-    window.removeEventListener('resize', this._resizeBound);
   }
 }
