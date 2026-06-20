@@ -244,70 +244,21 @@ export async function loadAR() {
 export function isARLoaded() { return arLoaded; }
 
 // ─── Force fullscreen on video/canvas elements ───────────────────
-function forceFullscreen(el) {
-  if (!el) return;
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-  const props = [
-    ['position',   'fixed'],
-    ['top',        '0'],
-    ['left',       '0'],
-    ['width',      '100vw'],
-    ['height',     '100vh'],
-    ['max-width',  '100vw'],
-    ['max-height', '100vh'],
-    ['object-fit', 'cover'],
-    ['transform',  'none'],
-    ['margin',     '0'],
-    ['padding',    '0'],
-    ['z-index',    el.tagName === 'VIDEO' ? '1' : '2'],
-  ];
-  // iOS Safari sometimes needs translateZ(0) for proper compositing
-  if (isIOS) {
-    props.push(['-webkit-transform', 'translateZ(0)']);
-  }
-  props.forEach(([p, v]) => el.style.setProperty(p, v, 'important'));
-}
+// DISABLED: AR.js needs to control video/canvas positioning for marker detection.
+// Our previous forceFullscreen approach was breaking AR.js's coordinate mapping.
+// Instead, we only ensure the a-scene is fullscreen via CSS.
 
-// ─── MutationObserver: fight AR.js inline style overrides ────────
+// ─── MutationObserver: REMOVED ──────────────────────────────────
+// The MutationObserver that forced styles on video/canvas elements was
+// interfering with AR.js marker detection. AR.js positions elements
+// precisely for its computer vision to work.
+
 function startVideoWatcher() {
-  stopVideoWatcher();
-
-  videoObserver = new MutationObserver((mutations) => {
-    for (const m of mutations) {
-      // New nodes added
-      if (m.addedNodes) {
-        m.addedNodes.forEach(node => {
-          if (node.nodeType !== 1) return;
-          if (node.tagName === 'VIDEO') forceFullscreen(node);
-          if (node.tagName === 'CANVAS' && (node.classList.contains('a-canvas') || node.closest('#ar-root'))) {
-            forceFullscreen(node);
-          }
-          // Check children too
-          if (node.querySelectorAll) {
-            node.querySelectorAll('video, canvas.a-canvas').forEach(forceFullscreen);
-          }
-        });
-      }
-      // Style mutations on video/canvas
-      if (m.type === 'attributes' && m.attributeName === 'style') {
-        const t = m.target;
-        if (t.tagName === 'VIDEO' || (t.tagName === 'CANVAS' && t.classList.contains('a-canvas'))) {
-          forceFullscreen(t);
-        }
-      }
-    }
-  });
-
-  videoObserver.observe(document.documentElement, {
-    childList: true,
-    subtree: true,
-    attributes: true,
-    attributeFilter: ['style'],
-  });
+  // No-op: we no longer fight AR.js's style mutations
 }
 
 function stopVideoWatcher() {
-  if (videoObserver) { videoObserver.disconnect(); videoObserver = null; }
+  // No-op
 }
 
 // ─── startARScene ─────────────────────────────────────────────────
@@ -338,46 +289,36 @@ export function startARScene(container, markerContent, options = {}) {
   // ── Fullscreen overlay ──
   const root = document.createElement('div');
   root.id = 'ar-root';
-  root.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:9999;overflow:hidden;background:#000;';
+  root.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:9999;overflow:hidden;';
   document.body.appendChild(root);
   arRootEl = root;
 
-  // Scene wrapper
-  const sceneWrap = document.createElement('div');
-  sceneWrap.id = 'ar-scene-wrap';
-  sceneWrap.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;';
-  root.appendChild(sceneWrap);
-
-  // AR.js config optimized for mobile
+  // AR.js config — keep it simple, let AR.js handle video rendering
   const sourceWidth = isIOS ? 640 : 800;
   const sourceHeight = isIOS ? 480 : 600;
 
-  sceneWrap.innerHTML = `
+  root.innerHTML = `
     <a-scene
+      embedded
       arjs="sourceType: webcam;
             facingMode: environment;
             sourceWidth: ${sourceWidth};
             sourceHeight: ${sourceHeight};
-            displayWidth: ${window.innerWidth};
-            displayHeight: ${window.innerHeight};
             debugUIEnabled: false;
             detectionMode: mono_and_matrix;
             matrixCodeType: 3x3;
             patternRatio: 0.75;
-            maxDetectionRate: 60;
-            canvasWidth: ${window.innerWidth};
-            canvasHeight: ${window.innerHeight};"
-      renderer="antialias: true; alpha: true; precision: ${isIOS ? 'highp' : 'mediump'}; logarithmicDepthBuffer: true;"
+            maxDetectionRate: 60;"
+      renderer="antialias: true; alpha: true; precision: mediump;"
       vr-mode-ui="enabled: false"
       loading-screen="enabled: false"
       device-orientation-permission-ui="enabled: false"
+      style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;"
     >
       <a-marker preset="hiro" id="ar-hiro-marker" smooth="true" smoothCount="5" smoothTolerance="0.01" smoothThreshold="2">
         ${markerContent}
       </a-marker>
       <a-entity camera></a-entity>
-      <a-light type="ambient" color="#ffffff" intensity="0.8"></a-light>
-      <a-light type="directional" color="#ffffff" intensity="0.5" position="1 2 1"></a-light>
     </a-scene>
   `;
 
@@ -430,11 +371,11 @@ export function startARScene(container, markerContent, options = {}) {
   // This ensures it's never blocked by A-Frame's scene elements
   document.body.appendChild(closeBtn);
 
-  // ── Scan overlay ──
+  // ── Scan overlay — semi-transparent so camera feed shows through ──
   const scanOverlay = document.createElement('div');
   scanOverlay.id = 'ar-scan-overlay';
   scanOverlay.className = 'ar-scan-overlay';
-  scanOverlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:10000;pointer-events:none;';
+  scanOverlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:10000;pointer-events:none;background:transparent;';
   scanOverlay.innerHTML = `
     <div class="ar-scan-box">
       <div class="ar-scan-corners">
@@ -468,13 +409,8 @@ export function startARScene(container, markerContent, options = {}) {
   // Stop modal killer after 10 seconds (dialog should be gone by then)
   setTimeout(() => clearInterval(modalKiller), 10000);
 
-  // ── Post-init: fix video, attach marker events ──
+  // ── Post-init: attach marker events ──
   const initTimeout = setTimeout(() => {
-    document.querySelectorAll('video').forEach(forceFullscreen);
-    document.querySelectorAll('canvas.a-canvas, canvas').forEach(c => {
-      if (c.closest('#ar-root') || c.parentElement === document.body) forceFullscreen(c);
-    });
-
     const marker = document.getElementById('ar-hiro-marker');
     if (marker) {
       marker.addEventListener('markerFound', () => {
@@ -486,7 +422,7 @@ export function startARScene(container, markerContent, options = {}) {
         if (options.onMarkerLost) options.onMarkerLost();
       });
     }
-  }, 1000);
+  }, 2000);
 
   // ── Safety timeout: if AR scene doesn't load in 30s, show error ──
   const safetyTimeout = setTimeout(() => {

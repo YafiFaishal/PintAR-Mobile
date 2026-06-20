@@ -819,25 +819,19 @@ a-scene .a-enter-vr {
 }
 
 /* ── AR overlay injected to body by ar-loader.js ──
-   The #ar-root div is position:fixed appended to body.
-   AR.js also injects body > video — keep it fullscreen. */
-body > video {
-  position: fixed !important;
-  top: 0 !important; left: 0 !important;
+   Let AR.js handle video/canvas positioning for marker detection.
+   We only ensure the a-scene fills its container. */
+#ar-root a-scene {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
   width: 100% !important;
   height: 100% !important;
-  object-fit: cover !important;
-  z-index: 99 !important;
 }
 
-/* A-Frame renders a canvas — ensure it fills screen */
-body > #ar-root canvas,
-body > #ar-root .a-canvas {
-  position: absolute !important;
-  top: 0 !important; left: 0 !important;
+#ar-root a-scene .a-canvas {
   width: 100% !important;
   height: 100% !important;
-  object-fit: cover !important;
 }
 
 /* Canvas fallback for non-AR mode */
