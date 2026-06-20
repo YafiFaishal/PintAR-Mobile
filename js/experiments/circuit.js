@@ -22,7 +22,7 @@
  */
 
 import { sensorManager } from '../modules/sensors.js';
-import { SimCanvas, loadAR, canRunAR, startARScene } from '../modules/ar-loader.js';
+import { SimCanvas, loadAR, canRunAR, startARScene, destroyARScene } from '../modules/ar-loader.js';
 import { showTutorial } from '../modules/tutorial.js';
 import { initLKS } from '../modules/lks.js';
 
@@ -378,10 +378,15 @@ modeBtns.forEach((btn) => {
       arView.innerHTML = '<p style="padding:var(--space-6);text-align:center;color:var(--text-secondary)">Memuat AR...</p>';
       const loaded = await loadAR();
       if (loaded) {
-        arView.innerHTML = `<a-scene embedded arjs="sourceType: webcam; facingMode: environment; debugUIEnabled: false;" vr-mode-ui="enabled:false" style="position:absolute;top:0;left:0;width:100%;height:100%;overflow:hidden;"><a-marker preset="hiro"><a-entity rotation="-90 0 0" scale="0.5 0.5 0.5"><a-box position="-0.5 0 0" width="0.3" height="0.1" depth="0.2" color="#64748b"></a-box><a-box position="0 0 0" width="0.3" height="0.1" depth="0.2" color="#64748b"></a-box><a-box position="0.5 0 0" width="0.3" height="0.1" depth="0.2" color="#64748b"></a-box><a-sphere position="0 0.5 0" radius="0.15" color="#FFD600" material="emissive:#FFD600;emissiveIntensity:${Math.min(1, Itotal*10).toFixed(2)}"></a-sphere></a-entity></a-marker><a-entity camera></a-entity></a-scene>`;
+        startARScene(arView, `<a-entity rotation="-90 0 0" scale="0.5 0.5 0.5"><a-box position="-0.5 0 0" width="0.3" height="0.1" depth="0.2" color="#64748b"></a-box><a-box position="0 0 0" width="0.3" height="0.1" depth="0.2" color="#64748b"></a-box><a-box position="0.5 0 0" width="0.3" height="0.1" depth="0.2" color="#64748b"></a-box><a-sphere position="0 0.5 0" radius="0.15" color="#FFD600" material="emissive:#FFD600;emissiveIntensity:${Math.min(1, Itotal*10).toFixed(2)}"></a-sphere></a-entity>`, {
+          onMarkerFound: () => window.showToast('Marker terdeteksi! 🎉', 'success', 2000),
+          onMarkerLost: () => {}
+        });
+        window.showToast('AR aktif! Arahkan ke marker Hiro.', 'info', 3000);
         window.showToast('AR aktif!', 'info');
       } else { window.showToast('Gagal memuat AR.', 'error'); modeBtns[0].click(); }
     } else {
+      destroyARScene();
       document.body.classList.remove('ar-active');
       arView.classList.add('hidden'); arView.innerHTML = '';
       simView.classList.remove('hidden'); sim.start();

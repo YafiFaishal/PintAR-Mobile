@@ -15,7 +15,7 @@
  */
 
 import { sensorManager } from '../modules/sensors.js';
-import { SimCanvas, loadAR, canRunAR, startARScene } from '../modules/ar-loader.js';
+import { SimCanvas, loadAR, canRunAR, startARScene, destroyARScene } from '../modules/ar-loader.js';
 import { showTutorial } from '../modules/tutorial.js';
 import { initLKS } from '../modules/lks.js';
 
@@ -290,10 +290,15 @@ modeBtns.forEach((btn) => {
       arView.innerHTML = '<p style="padding:var(--space-6);text-align:center;color:var(--text-secondary)">Memuat AR...</p>';
       const loaded = await loadAR();
       if (loaded) {
-        arView.innerHTML = `<a-scene embedded arjs="sourceType: webcam; facingMode: environment; debugUIEnabled: false;" vr-mode-ui="enabled:false" style="position:absolute;top:0;left:0;width:100%;height:100%;overflow:hidden;"><a-marker preset="hiro"><a-entity rotation="-90 0 0" scale="0.5 0.5 0.5"><a-plane width="3" height="3" color="#87CEEB" material="transparent:true;opacity:0.3" position="0 0 0.01"></a-plane><a-plane width="3" height="3" color="#004080" material="transparent:true;opacity:0.3" position="0 0 -0.01"></a-plane></a-entity></a-marker><a-entity camera></a-entity></a-scene>`;
+        startARScene(arView, `<a-entity rotation="-90 0 0" scale="0.5 0.5 0.5"><a-plane width="3" height="3" color="#87CEEB" material="transparent:true;opacity:0.3" position="0 0 0.01"></a-plane><a-plane width="3" height="3" color="#004080" material="transparent:true;opacity:0.3" position="0 0 -0.01"></a-plane></a-entity>`, {
+          onMarkerFound: () => window.showToast('Marker terdeteksi! 🎉', 'success', 2000),
+          onMarkerLost: () => {}
+        });
+        window.showToast('AR aktif! Arahkan ke marker Hiro.', 'info', 3000);
         window.showToast('AR aktif!', 'info');
       } else { window.showToast('Gagal memuat AR.', 'error'); modeBtns[0].click(); }
     } else {
+      destroyARScene();
       document.body.classList.remove('ar-active');
       arView.classList.add('hidden'); arView.innerHTML = '';
       simView.classList.remove('hidden'); sim.start();

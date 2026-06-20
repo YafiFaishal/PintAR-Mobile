@@ -5,7 +5,7 @@
  */
 
 import { sensorManager } from '../modules/sensors.js';
-import { SimCanvas, loadAR, canRunAR, startARScene } from '../modules/ar-loader.js';
+import { SimCanvas, loadAR, canRunAR, startARScene, destroyARScene } from '../modules/ar-loader.js';
 import { SimpleGraph } from '../modules/graph.js';
 import { showTutorial } from '../modules/tutorial.js';
 import { initLKS } from '../modules/lks.js';
@@ -317,7 +317,8 @@ modeBtns.forEach((btn) => {
       }
     } else {
       if (arInstance) { arInstance.destroy(); arInstance = null; }
-      document.body.classList.remove('ar-active'); // exit fullscreen
+      destroyARScene(); // remove #ar-root overlay & stop camera
+      document.body.classList.remove('ar-active');
       arView.classList.add('hidden');
       arView.innerHTML = '';
       simView.classList.remove('hidden');

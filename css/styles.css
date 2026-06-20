@@ -769,8 +769,7 @@ ul, ol { list-style: none; }
   text-overflow: ellipsis;
 }
 
-/* AR viewport area */
-/* AR viewport — normal (non-AR mode): just a placeholder, hidden */
+/* AR viewport — placeholder only, hidden when AR is active */
 .ar-viewport {
   flex: 1;
   position: relative;
@@ -781,44 +780,23 @@ ul, ol { list-style: none; }
   width: 100%;
 }
 
-/* AR mode ACTIVE — ar-view goes fullscreen behind the header/bottom-sheet */
-body.ar-active .ar-viewport {
+/* ── AR overlay injected to body by ar-loader.js ──
+   The #ar-root div is position:fixed appended to body.
+   AR.js also injects body > video — keep it fullscreen. */
+body > video {
   position: fixed !important;
-  inset: 0 !important;
-  width: 100vw !important;
-  height: 100dvh !important;
-  height: 100vh !important; /* fallback */
-  z-index: 100 !important;
-  overflow: hidden !important;
-}
-
-/* In AR mode, a-scene fills the whole fixed viewport */
-body.ar-active .ar-viewport a-scene {
-  position: absolute !important;
-  top: 0 !important;
-  left: 0 !important;
+  top: 0 !important; left: 0 !important;
   width: 100% !important;
   height: 100% !important;
-}
-
-/* AR.js injects video at body level — force it fullscreen */
-body.ar-active > video {
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  width: 100vw !important;
-  height: 100dvh !important;
-  height: 100vh !important;
   object-fit: cover !important;
   z-index: 99 !important;
 }
 
-/* AR.js canvas covers full viewport */
-body.ar-active .ar-viewport canvas,
-body.ar-active .ar-viewport .a-canvas {
+/* A-Frame renders a canvas — ensure it fills screen */
+body > #ar-root canvas,
+body > #ar-root .a-canvas {
   position: absolute !important;
-  top: 0 !important;
-  left: 0 !important;
+  top: 0 !important; left: 0 !important;
   width: 100% !important;
   height: 100% !important;
   object-fit: cover !important;
